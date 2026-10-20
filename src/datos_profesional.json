@@ -1,0 +1,22 @@
+{
+  "nombre": "Profesional de ejemplo",
+  "especialidad": "Fotografía",
+  "servicios": [
+    {
+      "nombre": "Retrato profesional",
+      "duracion_minutos": 45,
+      "precio_clp": 35000
+    },
+    {
+      "nombre": "Sesión familiar",
+      "duracion_minutos": 60,
+      "precio_clp": 55000
+    }
+  ],
+  "modalidad": "Presencial",
+  "politicas": {
+    "cancelacion": "Solicitar cancelaciones con al menos 24 horas de anticipación.",
+    "pago": "El pago se coordina directamente con el profesional.",
+    "agendamiento": "Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas."
+  }
+}

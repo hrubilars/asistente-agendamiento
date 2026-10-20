@@ -2,8 +2,47 @@ import os
 import requests
 from dotenv import load_dotenv
 
+# IMPORTACIONES ESPECIFICAS
+import json
+from pathlib import Path
+# IMPORTACIONES ESPECIFICAS
+
 load_dotenv()
 
+# FUNCIONES NUEVAS PARA TRABAJAR CON PROFESIONAL Y CONSULTA
+def cargar_datos_profesional():
+    ruta = Path(__file__).resolve().parent / "datos_profesional.json"
+
+    try:
+        with ruta.open("r", encoding="utf-8") as archivo:
+            return json.load(archivo)
+    except FileNotFoundError:
+        raise RuntimeError(
+            "No se encontró el archivo de datos del profesional."
+        )
+    except json.JSONDecodeError:
+        raise RuntimeError(
+            "El archivo de datos del profesional no contiene JSON válido."
+        )
+
+
+def preparar_consulta(consulta, profesional):
+    if not consulta.strip():
+        raise ValueError("La consulta no puede estar vacía")
+
+    informacion = json.dumps(profesional, ensure_ascii=False, indent=2)
+
+    return (
+        "Actúa como asistente de atención de un profesional independiente.\n"
+        "Responde en español, de forma breve y clara.\n"
+        "Usa exclusivamente los datos del profesional que se entregan abajo.\n"
+        "Si falta información, indícalo y pregunta lo necesario.\n"
+        "No inventes servicios, precios ni horarios disponibles.\n"
+        "No confirmes reservas: solo orienta sobre la solicitud.\n\n"
+        f"DATOS DEL PROFESIONAL:\n{informacion}\n\n"
+        f"CONSULTA DEL USUARIO:\n{consulta}"
+    )
+# FIN FUNCIONES NUEVAS PARA TRABAJAR CON PROFESIONAL Y CONSULTA
 
 def armar_peticion(pregunta):
     if not pregunta:
@@ -92,10 +131,28 @@ def obtener_dato_de_prueba(pregunta):
 
     return extraer_texto(datos)
 
-try:
-    resultado = obtener_dato_de_prueba(
-       "Confirma en una frase corta que esta conexión funciona."
-    )
-    print(resultado)
-except (ValueError, RuntimeError) as error:
-    print("No se pudo completar la operación:", error)
+#try:
+#    resultado = obtener_dato_de_prueba(
+#       "Confirma en una frase corta que esta conexión funciona."
+#    )
+#    print(resultado)
+#except (ValueError, RuntimeError) as error:
+#    print("No se pudo completar la operación:", error)
+
+if __name__ == "__main__":
+    try:
+        profesional = cargar_datos_profesional()
+
+        print("Asistente de atención y solicitudes de hora")
+        print("Esta versión no confirma reservas.\n")
+
+        consulta = input("Escribe tu consulta: ")
+        pregunta = preparar_consulta(consulta, profesional)
+
+        resultado = obtener_dato_de_prueba(pregunta)
+
+        print("\nRespuesta:")
+        print(resultado)
+
+    except (ValueError, RuntimeError) as error:
+        print("No se pudo completar la operación:", error)
