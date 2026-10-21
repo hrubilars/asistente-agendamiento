@@ -1,4 +1,5 @@
 import os
+from time import perf_counter
 import requests
 from dotenv import load_dotenv
 
@@ -44,12 +45,12 @@ def preparar_consulta(consulta, profesional):
     )
 # FIN FUNCIONES NUEVAS PARA TRABAJAR CON PROFESIONAL Y CONSULTA
 
-def armar_peticion(pregunta):
+def armar_peticion(pregunta, modelo="gemini-3.6-flash"):
     if not pregunta:
         raise ValueError("La pregunta no puede estar vacía")
 
     api_key = os.getenv("GEMINI_API_KEY")
-    modelo = "gemini-3.6-flash"
+    #modelo = "gemini-3.6-flash"
 
     url = (
         "https://generativelanguage.googleapis.com/"
@@ -115,21 +116,28 @@ def calcular_costo(datos, precio_entrada, precio_salida):
             "para calcular el costo."
         )
 
-def obtener_dato_de_prueba(pregunta):
-    url, body = armar_peticion(pregunta)
-    datos = enviar_peticion(url, body)
+def obtener_dato_de_prueba(pregunta, modelo="gemini-3.6-flash"):
+    url, body = armar_peticion(pregunta, modelo=modelo)
 
-    # ▼ NUEVO: calcular y mostrar el costo
+    # Medir la duración de la petición al servicio.
+    inicio = perf_counter()
+    datos = enviar_peticion(url, body)
+    latencia = perf_counter() - inicio
+
+    # Confirmar que la respuesta contiene texto.
+    texto = extraer_texto(datos)
+
     costo = calcular_costo(
         datos,
         precio_entrada=0.00000075,
         precio_salida=0.00000375,
     )
 
+    print(f"Modelo solicitado: {modelo}")
+    print(f"Latencia de la petición: {latencia:.2f} segundos")
     print(f"Costo estimado de la operación: ${costo:.6f} USD")
-    # ▲ FIN DE LO NUEVO
 
-    return extraer_texto(datos)
+    return texto
 
 #try:
 #    resultado = obtener_dato_de_prueba(
