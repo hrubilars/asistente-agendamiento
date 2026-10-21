@@ -25,7 +25,8 @@ La reserva requiere contacto directo y confirmación del profesional.
 
 ## Requisitos
 
-- Python 3.9 o superior.
+- Python 3.14.8, versión utilizada en el ensayo de instalación.
+  Otras versiones no han sido verificadas.
 - Git.
 - Conexión a internet.
 - Una clave de Gemini con acceso y cuota para el modelo utilizado.
@@ -147,6 +148,21 @@ Cada ejecución genera un archivo `registro-*.json` en `prompts/`,
 con resultados de validación y errores.
 
 La revisión manual del texto complementa la validación automática.
+
+## Pruebas locales del validador
+
+Ejecutar desde la raíz del proyecto:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+Comprueban la aceptación de una respuesta válida y el rechazo de
+JSON malformado, estructura incorrecta, claves faltantes, tipos
+incorrectos, texto vacío y confirmaciones de reserva.
+
+No realizan llamadas al proveedor ni sustituyen las pruebas de
+consistencia con la API real.
 
 ## Estado de las pruebas
 
