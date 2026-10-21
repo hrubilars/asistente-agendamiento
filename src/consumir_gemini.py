@@ -27,6 +27,26 @@ def cargar_datos_profesional():
         )
 
 
+def crear_instrucciones_sistema(profesional):
+    informacion = json.dumps(profesional, ensure_ascii=False, indent=2)
+
+    return (
+        "Actúa como asistente de atención de un profesional independiente.\n"
+        "Responde en español, de forma breve y clara.\n"
+        "Usa exclusivamente los datos del catálogo proporcionado.\n"
+        "Si falta información, indícalo y pregunta lo necesario.\n"
+        "No inventes servicios, precios ni horarios disponibles.\n"
+        "No puedes consultar disponibilidad ni confirmar reservas.\n"
+        "No puedes registrar, guardar, tramitar ni enviar solicitudes.\n"
+        "No ofrezcas realizar esas acciones ni afirmes haberlas realizado.\n"
+        "Para concretar una reserva, indica que requiere contacto "
+        "directo y confirmación del profesional.\n"
+        "No inventes datos de contacto que no estén en el catálogo.\n"
+        "No solicites datos personales para simular una gestión.\n\n"
+        f"CATÁLOGO DEL PROFESIONAL:\n{informacion}"
+    )
+
+
 def preparar_consulta(consulta, profesional):
     if not consulta.strip():
         raise ValueError("La consulta no puede estar vacía")
@@ -45,12 +65,17 @@ def preparar_consulta(consulta, profesional):
     )
 # FIN FUNCIONES NUEVAS PARA TRABAJAR CON PROFESIONAL Y CONSULTA
 
-def armar_peticion(pregunta, modelo="gemini-3.6-flash"):
-    if not pregunta:
+def armar_peticion(
+    pregunta,
+    modelo="gemini-3.6-flash",
+    system_instruction=None,
+):
+    if not isinstance(pregunta, str) or not pregunta.strip():
         raise ValueError("La pregunta no puede estar vacía")
 
     api_key = os.getenv("GEMINI_API_KEY")
-    #modelo = "gemini-3.6-flash"
+    if not api_key:
+        raise RuntimeError("Falta configurar GEMINI_API_KEY en .env")
 
     url = (
         "https://generativelanguage.googleapis.com/"
@@ -60,12 +85,16 @@ def armar_peticion(pregunta, modelo="gemini-3.6-flash"):
     body = {
         "contents": [
             {
-                "parts": [
-                    {"text": pregunta}
-                ]
+                "role": "user",
+                "parts": [{"text": pregunta.strip()}],
             }
         ]
     }
+
+    if system_instruction:
+        body["systemInstruction"] = {
+            "parts": [{"text": system_instruction}]
+        }
 
     return url, body
 
@@ -116,8 +145,16 @@ def calcular_costo(datos, precio_entrada, precio_salida):
             "para calcular el costo."
         )
 
-def obtener_dato_de_prueba(pregunta, modelo="gemini-3.6-flash"):
-    url, body = armar_peticion(pregunta, modelo=modelo)
+def obtener_dato_de_prueba(
+    pregunta,
+    modelo="gemini-3.6-flash",
+    system_instruction=None,
+):
+    url, body = armar_peticion(
+        pregunta,
+        modelo=modelo,
+        system_instruction=system_instruction,
+    )
 
     # Medir la duración de la petición al servicio.
     inicio = perf_counter()
@@ -150,14 +187,17 @@ def obtener_dato_de_prueba(pregunta, modelo="gemini-3.6-flash"):
 if __name__ == "__main__":
     try:
         profesional = cargar_datos_profesional()
+        instrucciones = crear_instrucciones_sistema(profesional)
 
         print("Asistente de atención y solicitudes de hora")
-        print("Esta versión no confirma reservas.\n")
+        print("Esta versión no confirma ni registra reservas.\n")
 
         consulta = input("Escribe tu consulta: ")
-        pregunta = preparar_consulta(consulta, profesional)
 
-        resultado = obtener_dato_de_prueba(pregunta)
+        resultado = obtener_dato_de_prueba(
+            consulta,
+            system_instruction=instrucciones,
+        )
 
         print("\nRespuesta:")
         print(resultado)
