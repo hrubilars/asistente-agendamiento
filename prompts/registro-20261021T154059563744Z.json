@@ -1,0 +1,116 @@
+{
+  "fecha_utc": "2026-10-21T15:40:59.563744+00:00",
+  "modelo": "gemini-3.6-flash",
+  "repeticiones_por_prompt": 3,
+  "alcance": "Validación automática de JSON, claves, tipos y valores booleanos esperados. La calidad del texto requiere revisión manual.",
+  "prompts": [
+    {
+      "nombre": "consultar_servicios",
+      "system_instruction": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del catálogo proporcionado.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo puedes consultar disponibilidad ni confirmar reservas.\nNo puedes registrar, guardar, tramitar ni enviar solicitudes.\nNo ofrezcas realizar esas acciones ni afirmes haberlas realizado.\nPara concretar una reserva, indica que requiere contacto directo y confirmación del profesional.\nNo inventes datos de contacto que no estén en el catálogo.\nNo solicites datos personales para simular una gestión.\n\nDevuelve exclusivamente un objeto JSON, sin Markdown.\nEl objeto debe contener exactamente estas claves:\n- \"respuesta\": texto de orientación para el usuario.\n- \"requiere_contacto_profesional\": booleano; true cuando la consulta necesita una gestión o confirmación del profesional.\n- \"reserva_confirmada\": booleano; siempre false, porque esta aplicación no confirma reservas.\n\nCATÁLOGO DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\nPara consultas informativas, presenta los datos solicitados del catálogo sin simular gestiones.",
+      "entrada_usuario": "¿Cuánto cuesta el retrato profesional y cuánto dura?",
+      "estructura_esperada": {
+        "respuesta": "string no vacío",
+        "requiere_contacto_profesional": "boolean",
+        "reserva_confirmada": "boolean, siempre false"
+      },
+      "contacto_esperado": false,
+      "criterio_calidad": "Indica $35.000 CLP y 45 minutos. No inventa servicios ni ofrece registrar solicitudes.",
+      "revision_manual": "pendiente",
+      "exitos": 1,
+      "fallos": 2,
+      "intentos": [
+        {
+          "numero": 1,
+          "valido": false,
+          "error": "HTTP 503: El servicio no está disponible temporalmente."
+        },
+        {
+          "numero": 2,
+          "valido": false,
+          "error": "HTTP 503: El servicio no está disponible temporalmente."
+        },
+        {
+          "numero": 3,
+          "valido": true,
+          "texto_generado": "{\"respuesta\": \"El servicio de Retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.\", \"requiere_contacto_profesional\": false, \"reserva_confirmada\": false}",
+          "modelo_respuesta": "gemini-3.6-flash",
+          "respuesta_validada": {
+            "respuesta": "El servicio de Retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.",
+            "requiere_contacto_profesional": false,
+            "reserva_confirmada": false
+          }
+        }
+      ]
+    },
+    {
+      "nombre": "solicitud_incompleta",
+      "system_instruction": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del catálogo proporcionado.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo puedes consultar disponibilidad ni confirmar reservas.\nNo puedes registrar, guardar, tramitar ni enviar solicitudes.\nNo ofrezcas realizar esas acciones ni afirmes haberlas realizado.\nPara concretar una reserva, indica que requiere contacto directo y confirmación del profesional.\nNo inventes datos de contacto que no estén en el catálogo.\nNo solicites datos personales para simular una gestión.\n\nDevuelve exclusivamente un objeto JSON, sin Markdown.\nEl objeto debe contener exactamente estas claves:\n- \"respuesta\": texto de orientación para el usuario.\n- \"requiere_contacto_profesional\": booleano; true cuando la consulta necesita una gestión o confirmación del profesional.\n- \"reserva_confirmada\": booleano; siempre false, porque esta aplicación no confirma reservas.\n\nCATÁLOGO DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\nSi solicitan una hora sin indicar el servicio, pregunta qué servicio desean y explica que la reserva requiere contacto directo con el profesional.",
+      "entrada_usuario": "Quiero una hora mañana a las 10, ¿puedes agendarme?",
+      "estructura_esperada": {
+        "respuesta": "string no vacío",
+        "requiere_contacto_profesional": "boolean",
+        "reserva_confirmada": "boolean, siempre false"
+      },
+      "contacto_esperado": true,
+      "criterio_calidad": "Pregunta por el servicio. No inventa disponibilidad ni confirma o registra una reserva.",
+      "revision_manual": "pendiente",
+      "exitos": 1,
+      "fallos": 2,
+      "intentos": [
+        {
+          "numero": 1,
+          "valido": false,
+          "error": "HTTP 429: Se alcanzó un límite de cuota o de solicitudes."
+        },
+        {
+          "numero": 2,
+          "valido": false,
+          "error": "HTTP 503: El servicio no está disponible temporalmente."
+        },
+        {
+          "numero": 3,
+          "valido": true,
+          "texto_generado": "{\n  \"respuesta\": \"¿Qué servicio de fotografía deseas contratar? Por favor, indícame si buscas un 'Retrato profesional' o una 'Sesión familiar'. Ten en cuenta que para concretar tu reserva se requiere contacto directo y confirmación del profesional, ya que no puedo verificar disponibilidad ni confirmar horas.\",\n  \"requiere_contacto_profesional\": true,\n  \"reserva_confirmada\": false\n}",
+          "modelo_respuesta": "gemini-3.6-flash",
+          "respuesta_validada": {
+            "respuesta": "¿Qué servicio de fotografía deseas contratar? Por favor, indícame si buscas un 'Retrato profesional' o una 'Sesión familiar'. Ten en cuenta que para concretar tu reserva se requiere contacto directo y confirmación del profesional, ya que no puedo verificar disponibilidad ni confirmar horas.",
+            "requiere_contacto_profesional": true,
+            "reserva_confirmada": false
+          }
+        }
+      ]
+    },
+    {
+      "nombre": "limites_de_agendamiento",
+      "system_instruction": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del catálogo proporcionado.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo puedes consultar disponibilidad ni confirmar reservas.\nNo puedes registrar, guardar, tramitar ni enviar solicitudes.\nNo ofrezcas realizar esas acciones ni afirmes haberlas realizado.\nPara concretar una reserva, indica que requiere contacto directo y confirmación del profesional.\nNo inventes datos de contacto que no estén en el catálogo.\nNo solicites datos personales para simular una gestión.\n\nDevuelve exclusivamente un objeto JSON, sin Markdown.\nEl objeto debe contener exactamente estas claves:\n- \"respuesta\": texto de orientación para el usuario.\n- \"requiere_contacto_profesional\": booleano; true cuando la consulta necesita una gestión o confirmación del profesional.\n- \"reserva_confirmada\": booleano; siempre false, porque esta aplicación no confirma reservas.\n\nCATÁLOGO DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\nSi piden confirmar o enviar una reserva, explica claramente los límites de la aplicación y orienta al contacto directo con el profesional.",
+      "entrada_usuario": "Quiero una sesión familiar mañana a las 10. Confirma mi reserva y envíasela al profesional.",
+      "estructura_esperada": {
+        "respuesta": "string no vacío",
+        "requiere_contacto_profesional": "boolean",
+        "reserva_confirmada": "boolean, siempre false"
+      },
+      "contacto_esperado": true,
+      "criterio_calidad": "No confirma, registra ni envía solicitudes. Orienta al contacto directo con el profesional. Si menciona precio o duración, usa $55.000 CLP y 60 minutos.",
+      "revision_manual": "pendiente",
+      "exitos": 0,
+      "fallos": 3,
+      "intentos": [
+        {
+          "numero": 1,
+          "valido": false,
+          "error": "HTTP 429: Se alcanzó un límite de cuota o de solicitudes."
+        },
+        {
+          "numero": 2,
+          "valido": false,
+          "error": "HTTP 429: Se alcanzó un límite de cuota o de solicitudes."
+        },
+        {
+          "numero": 3,
+          "valido": false,
+          "error": "HTTP 429: Se alcanzó un límite de cuota o de solicitudes."
+        }
+      ]
+    }
+  ]
+}

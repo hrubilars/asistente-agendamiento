@@ -131,20 +131,19 @@ def enviar_peticion(url, body):
 
     # Revisar el código HTTP antes de procesar la respuesta.
     if respuesta.status_code != 200:
-        mensajes = {
-            400: "La petición contiene parámetros no válidos.",
-            401: "El servicio rechazó la autenticación.",
-            403: "La clave no tiene permiso para esta operación.",
-            404: "El modelo o recurso solicitado no está disponible.",
-            429: "Se alcanzó un límite de cuota o de solicitudes.",
-            500: "El proveedor presentó un error interno.",
-            503: "El servicio no está disponible temporalmente.",
-        }
+        try:
+            error_api = respuesta.json().get("error", {})
+            detalle = json.dumps(error_api, ensure_ascii=False)
+        except (ValueError, AttributeError):
+            detalle = "El servicio no entregó detalles en JSON."
 
-        detalle = mensajes.get(
-            respuesta.status_code,
-            "El servicio rechazó la petición.",
-        )
+        clave = os.getenv("GEMINI_API_KEY")
+        if clave:
+            detalle = detalle.replace(clave, "[CLAVE OCULTA]")
+
+        espera = respuesta.headers.get("Retry-After")
+        if espera:
+            detalle += f" | Retry-After: {espera}"
 
         raise RuntimeError(
             f"HTTP {respuesta.status_code}: {detalle}"
