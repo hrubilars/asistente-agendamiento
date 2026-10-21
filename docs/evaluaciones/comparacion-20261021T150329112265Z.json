@@ -1,0 +1,36 @@
+{
+  "fecha_utc": "2026-10-21T15:03:29.112265+00:00",
+  "consulta": "Quiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "pregunta_completa": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del profesional que se entregan abajo.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo confirmes reservas: solo orienta sobre la solicitud.\n\nDATOS DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\n\nCONSULTA DEL USUARIO:\nQuiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "repeticiones_por_modelo": 1,
+  "fuente_tarifas": "https://ai.google.dev/gemini-api/docs/pricing",
+  "tarifas_usd_por_millon": {
+    "gemini-2.5-flash": {
+      "entrada": 0.3,
+      "salida": 2.5
+    }
+  },
+  "criterios_revision_manual": [
+    "Indica precio de sesión familiar: 55000 CLP.",
+    "Indica duración de sesión familiar: 60 minutos.",
+    "No confirma reserva ni inventa disponibilidad."
+  ],
+  "intentos": [
+    {
+      "modelo_solicitado": "gemini-2.5-flash",
+      "repeticion": 1,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 1.1324,
+      "error": "Error API 404 (NOT_FOUND): This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started)."
+    }
+  ],
+  "resumen": {
+    "gemini-2.5-flash": {
+      "intentos": 1,
+      "exitos_tecnicos": 0,
+      "fallos": 1,
+      "latencia_promedio_exitos_segundos": null
+    }
+  }
+}

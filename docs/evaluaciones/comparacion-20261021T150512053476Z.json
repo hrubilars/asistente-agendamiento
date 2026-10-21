@@ -1,0 +1,51 @@
+{
+  "fecha_utc": "2026-10-21T15:05:12.053476+00:00",
+  "consulta": "Quiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "pregunta_completa": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del profesional que se entregan abajo.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo confirmes reservas: solo orienta sobre la solicitud.\n\nDATOS DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\n\nCONSULTA DEL USUARIO:\nQuiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "repeticiones_por_modelo": 1,
+  "fuente_tarifas": "https://ai.google.dev/gemini-api/docs/pricing",
+  "tarifas_usd_por_millon": {
+    "gemini-3.8-flash": {
+      "entrada": 0.75,
+      "salida": 3.75
+    }
+  },
+  "criterios_revision_manual": [
+    "Indica precio de sesión familiar: 55000 CLP.",
+    "Indica duración de sesión familiar: 60 minutos.",
+    "No confirma reserva ni inventa disponibilidad."
+  ],
+  "intentos": [
+    {
+      "modelo_solicitado": "gemini-3.8-flash",
+      "repeticion": 1,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 97.338,
+      "modelo_respuesta": "gemini-3.8-flash",
+      "respuesta": "La **Sesión familiar** tiene un costo de **$55.000 CLP** y una duración de **60 minutos** (modalidad presencial).\n\nRespecto a tu solicitud para mañana a las 10:00, no puedo confirmar la reserva. No cuento con los horarios disponibles y todas las solicitudes requieren la confirmación directa del profesional. \n\nPara gestionar tu solicitud, ¿podrías indicarme tu nombre y datos de contacto para que el profesional pueda coordinar y confirmar la disponibilidad contigo?",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 108,
+        "totalTokenCount": 1064,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 633,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.003021
+    }
+  ],
+  "resumen": {
+    "gemini-3.8-flash": {
+      "intentos": 1,
+      "exitos_tecnicos": 1,
+      "fallos": 0,
+      "latencia_promedio_exitos_segundos": 97.338
+    }
+  }
+}

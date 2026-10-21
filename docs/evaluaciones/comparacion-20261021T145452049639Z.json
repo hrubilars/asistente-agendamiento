@@ -1,0 +1,147 @@
+{
+  "fecha_utc": "2026-10-21T14:54:52.049639+00:00",
+  "consulta": "Quiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "pregunta_completa": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del profesional que se entregan abajo.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo confirmes reservas: solo orienta sobre la solicitud.\n\nDATOS DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\n\nCONSULTA DEL USUARIO:\nQuiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "repeticiones_por_modelo": 4,
+  "fuente_tarifas": "https://ai.google.dev/gemini-api/docs/pricing",
+  "tarifas_usd_por_millon": {
+    "gemini-3.6-flash": {
+      "entrada": 0.75,
+      "salida": 3.75
+    },
+    "gemini-2.5-flash": {
+      "entrada": 0.3,
+      "salida": 2.5
+    }
+  },
+  "criterios_revision_manual": [
+    "Indica precio de sesión familiar: 55000 CLP.",
+    "Indica duración de sesión familiar: 60 minutos.",
+    "No confirma reserva ni inventa disponibilidad."
+  ],
+  "intentos": [
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 1,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 52.2297,
+      "modelo_respuesta": "gemini-3.6-flash",
+      "respuesta": "Hola. La **Sesión familiar** tiene un costo de **$55.000 CLP** y una duración de **60 minutos**.\n\nRespecto a tu reserva para mañana a las 10:00, **no puedo confirmarla**. No tengo acceso a la agenda en tiempo real y todas las solicitudes requieren la confirmación directa del profesional.\n\nPara poder canalizar tu solicitud, ¿me indicas tu nombre y un medio de contacto para informarle al profesional sobre tu petición?",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 103,
+        "totalTokenCount": 1571,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 1145,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.00492225
+    },
+    {
+      "modelo_solicitado": "gemini-2.5-flash",
+      "repeticion": 1,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 1.327,
+      "error": "Falló la petición o la interpretación de la respuesta. Revisar conexión, cuota y modelo."
+    },
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 2,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 29.8016,
+      "modelo_respuesta": "gemini-3.6-flash",
+      "respuesta": "Hola. La **Sesión familiar** tiene una duración de **60 minutos** y un valor de **$55.000 CLP**.\n\nRespecto a tu solicitud, no puedo consultar disponibilidad ni confirmar reservas directamente, ya que todas las citas requieren la confirmación del profesional.\n\nPara poder orientarte y tramitar tu solicitud con el profesional, ¿podrías indicarme tu nombre completo y un número de contacto?",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 88,
+        "totalTokenCount": 1074,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 663,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.0030585
+    },
+    {
+      "modelo_solicitado": "gemini-2.5-flash",
+      "repeticion": 2,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 0.9777,
+      "error": "Falló la petición o la interpretación de la respuesta. Revisar conexión, cuota y modelo."
+    },
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 3,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 1.3945,
+      "error": "Falló la petición o la interpretación de la respuesta. Revisar conexión, cuota y modelo."
+    },
+    {
+      "modelo_solicitado": "gemini-2.5-flash",
+      "repeticion": 3,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 1.2346,
+      "error": "Falló la petición o la interpretación de la respuesta. Revisar conexión, cuota y modelo."
+    },
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 4,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 15.3262,
+      "modelo_respuesta": "gemini-3.6-flash",
+      "respuesta": "Hola. La **Sesión familiar** tiene un costo de **$55.000 CLP** y una duración de **60 minutos**.\n\nRespecto a tu solicitud para mañana a las 10:00, **no puedo verificar la disponibilidad ni confirmar la reserva**, ya que todas las citas requieren la confirmación directa del profesional.\n\nPara poder orientar tu solicitud al profesional, ¿me podrías indicar tu nombre y un método de contacto (teléfono o correo)?",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 100,
+        "totalTokenCount": 1268,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 845,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.003786
+    },
+    {
+      "modelo_solicitado": "gemini-2.5-flash",
+      "repeticion": 4,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 1.3111,
+      "error": "Falló la petición o la interpretación de la respuesta. Revisar conexión, cuota y modelo."
+    }
+  ],
+  "resumen": {
+    "gemini-3.6-flash": {
+      "intentos": 4,
+      "exitos_tecnicos": 3,
+      "fallos": 1,
+      "latencia_promedio_exitos_segundos": 32.4525
+    },
+    "gemini-2.5-flash": {
+      "intentos": 4,
+      "exitos_tecnicos": 0,
+      "fallos": 4,
+      "latencia_promedio_exitos_segundos": null
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "fecha_utc": "2026-10-21T15:07:33.182382+00:00",
+  "consulta": "Quiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "pregunta_completa": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del profesional que se entregan abajo.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo confirmes reservas: solo orienta sobre la solicitud.\n\nDATOS DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\n\nCONSULTA DEL USUARIO:\nQuiero una sesión familiar. ¿Cuánto cuesta y cuánto dura? ¿Puedes confirmar una reserva para mañana a las 10?",
+  "repeticiones_por_modelo": 4,
+  "fuente_tarifas": "https://ai.google.dev/gemini-api/docs/pricing",
+  "tarifas_usd_por_millon": {
+    "gemini-3.6-flash": {
+      "entrada": 0.75,
+      "salida": 3.75
+    },
+    "gemini-3.8-flash": {
+      "entrada": 0.75,
+      "salida": 3.75
+    }
+  },
+  "criterios_revision_manual": [
+    "Indica precio de sesión familiar: 55000 CLP.",
+    "Indica duración de sesión familiar: 60 minutos.",
+    "No confirma reserva ni inventa disponibilidad."
+  ],
+  "intentos": [
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 1,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 22.5502,
+      "modelo_respuesta": "gemini-3.6-flash",
+      "respuesta": "Hola. La **Sesión familiar** tiene una duración de **60 minutos** y un costo de **$55.000 CLP**.\n\nRespecto a tu solicitud para mañana a las 10:00, no puedo confirmar la reserva ni revisar disponibilidad, ya que todas las solicitudes requieren la confirmación directa del profesional. \n\nPara poder orientar tu solicitud y enviársela al profesional, ¿me podrías indicar tu nombre y un medio de contacto?",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 99,
+        "totalTokenCount": 1177,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 755,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.00344475
+    },
+    {
+      "modelo_solicitado": "gemini-3.8-flash",
+      "repeticion": 1,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 1.5327,
+      "error": "Error API 503 (UNAVAILABLE): This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+    },
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 2,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 10.2593,
+      "modelo_respuesta": "gemini-3.6-flash",
+      "respuesta": "Hola. La **Sesión familiar** tiene un costo de **$55.000 CLP** y una duración de **60 minutos**.\n\nRespecto a tu agendamiento, no puedo confirmar la reserva para mañana a las 10:00, ya que por este medio no se consulta disponibilidad ni se confirman citas. Tu solicitud queda sujeta a la confirmación directa del profesional.",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 84,
+        "totalTokenCount": 1028,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 621,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.002886
+    },
+    {
+      "modelo_solicitado": "gemini-3.8-flash",
+      "repeticion": 2,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 11.3056,
+      "error": "Error API 503 (UNAVAILABLE): This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+    },
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 3,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 4.644,
+      "error": "Error API 503 (UNAVAILABLE): This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+    },
+    {
+      "modelo_solicitado": "gemini-3.8-flash",
+      "repeticion": 3,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 2.2487,
+      "error": "Error API 503 (UNAVAILABLE): This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+    },
+    {
+      "modelo_solicitado": "gemini-3.6-flash",
+      "repeticion": 4,
+      "exito_tecnico": true,
+      "calidad_revision_manual": "pendiente",
+      "latencia_segundos": 24.0095,
+      "modelo_respuesta": "gemini-3.6-flash",
+      "respuesta": "Hola. La **Sesión familiar** tiene un valor de **$55.000 CLP** y una duración de **60 minutos** (modalidad presencial).\n\nRespecto a tu reserva, no puedo confirmarla directamente ya que no cuento con acceso a la agenda ni puedo confirmar horas. Todas las solicitudes requieren la confirmación del profesional.\n\n¿Deseas que registre tu solicitud para que el profesional revise la disponibilidad y se ponga en contacto contigo?",
+      "uso_tokens": {
+        "promptTokenCount": 323,
+        "candidatesTokenCount": 97,
+        "totalTokenCount": 1213,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 323
+          }
+        ],
+        "thoughtsTokenCount": 793,
+        "serviceTier": "standard"
+      },
+      "costo_estimado_usd": 0.00357975
+    },
+    {
+      "modelo_solicitado": "gemini-3.8-flash",
+      "repeticion": 4,
+      "exito_tecnico": false,
+      "calidad_revision_manual": "pendiente",
+      "duracion_intento_fallido_segundos": 6.2228,
+      "error": "Error API 503 (UNAVAILABLE): This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+    }
+  ],
+  "resumen": {
+    "gemini-3.6-flash": {
+      "intentos": 4,
+      "exitos_tecnicos": 3,
+      "fallos": 1,
+      "latencia_promedio_exitos_segundos": 18.939666666666668
+    },
+    "gemini-3.8-flash": {
+      "intentos": 4,
+      "exitos_tecnicos": 0,
+      "fallos": 4,
+      "latencia_promedio_exitos_segundos": null
+    }
+  }
+}
