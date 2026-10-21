@@ -111,19 +111,58 @@ def armar_peticion(
 
 def enviar_peticion(url, body):
     try:
-        respuesta = requests.post(url, json=body)
+        respuesta = requests.post(
+            url,
+            json=body,
+            timeout=(10, 90),
+        )
+    except requests.exceptions.Timeout:
+        raise RuntimeError(
+            "Se agotó el tiempo de espera del servicio."
+        ) from None
     except requests.exceptions.ConnectionError:
         raise RuntimeError(
-            "No se pudo conectar con el servicio. "
-            "Intenta de nuevo en unos segundos."
+            "No se pudo conectar con el servicio."
+        ) from None
+    except requests.exceptions.RequestException:
+        raise RuntimeError(
+            "No se pudo completar la petición al servicio."
+        ) from None
+
+    # Revisar el código HTTP antes de procesar la respuesta.
+    if respuesta.status_code != 200:
+        mensajes = {
+            400: "La petición contiene parámetros no válidos.",
+            401: "El servicio rechazó la autenticación.",
+            403: "La clave no tiene permiso para esta operación.",
+            404: "El modelo o recurso solicitado no está disponible.",
+            429: "Se alcanzó un límite de cuota o de solicitudes.",
+            500: "El proveedor presentó un error interno.",
+            503: "El servicio no está disponible temporalmente.",
+        }
+
+        detalle = mensajes.get(
+            respuesta.status_code,
+            "El servicio rechazó la petición.",
+        )
+
+        raise RuntimeError(
+            f"HTTP {respuesta.status_code}: {detalle}"
         )
 
     try:
-        return respuesta.json()
-    except requests.exceptions.JSONDecodeError:
+        datos = respuesta.json()
+    except ValueError:
         raise RuntimeError(
-            "La respuesta del servicio no llegó en el formato esperado."
+            "La respuesta del servicio no contiene JSON válido."
+        ) from None
+
+    if not isinstance(datos, dict):
+        raise RuntimeError(
+            "La respuesta del servicio debe ser un objeto JSON."
         )
+
+    return datos
 
 
 def extraer_texto(datos):
