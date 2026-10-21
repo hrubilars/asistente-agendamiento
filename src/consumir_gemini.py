@@ -43,6 +43,13 @@ def crear_instrucciones_sistema(profesional):
         "directo y confirmación del profesional.\n"
         "No inventes datos de contacto que no estén en el catálogo.\n"
         "No solicites datos personales para simular una gestión.\n\n"
+        "Devuelve exclusivamente un objeto JSON, sin Markdown.\n"
+        "El objeto debe contener exactamente estas claves:\n"
+        '- "respuesta": texto de orientación para el usuario.\n'
+        '- "requiere_contacto_profesional": booleano; true cuando '
+        "la consulta necesita una gestión o confirmación del profesional.\n"
+        '- "reserva_confirmada": booleano; siempre false, porque '
+        "esta aplicación no confirma reservas.\n\n"
         f"CATÁLOGO DEL PROFESIONAL:\n{informacion}"
     )
 
@@ -95,6 +102,9 @@ def armar_peticion(
         body["systemInstruction"] = {
             "parts": [{"text": system_instruction}]
         }
+        body["generationConfig"] = {
+            "responseMimeType": "application/json"
+        }
 
     return url, body
 
@@ -123,6 +133,48 @@ def extraer_texto(datos):
         raise RuntimeError(
             "La respuesta no trae el texto generado en el lugar esperado."
         )
+
+def parsear_respuesta_json(texto):
+    try:
+        datos = json.loads(texto)
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "El modelo no devolvió un JSON válido."
+        ) from error
+
+    if not isinstance(datos, dict):
+        raise ValueError("La respuesta debe ser un objeto JSON.")
+
+    claves_esperadas = {
+        "respuesta",
+        "requiere_contacto_profesional",
+        "reserva_confirmada",
+    }
+
+    if set(datos) != claves_esperadas:
+        raise ValueError(
+            "El JSON no contiene exactamente las claves esperadas."
+        )
+
+    if not isinstance(datos["respuesta"], str):
+        raise ValueError("'respuesta' debe ser un texto.")
+
+    if not datos["respuesta"].strip():
+        raise ValueError("'respuesta' no puede estar vacía.")
+
+    for clave in (
+        "requiere_contacto_profesional",
+        "reserva_confirmada",
+    ):
+        if not isinstance(datos[clave], bool):
+            raise ValueError(f"'{clave}' debe ser un booleano.")
+
+    if datos["reserva_confirmada"]:
+        raise ValueError(
+            "El modelo afirmó una reserva que la aplicación no puede confirmar."
+        )
+
+    return datos
 
 def calcular_costo(datos, precio_entrada, precio_salida):
     try:
@@ -199,8 +251,14 @@ if __name__ == "__main__":
             system_instruction=instrucciones,
         )
 
-        print("\nRespuesta:")
-        print(resultado)
+        datos_respuesta = parsear_respuesta_json(resultado)
+
+        print("\nJSON validado:")
+        print(json.dumps(
+            datos_respuesta,
+            indent=2,
+            ensure_ascii=False,
+        ))
 
     except (ValueError, RuntimeError) as error:
         print("No se pudo completar la operación:", error)
