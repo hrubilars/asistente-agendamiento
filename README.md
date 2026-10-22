@@ -70,6 +70,11 @@ No debe agregarse al repositorio.
 
 ## Ejecutar el asistente
 
+Modelo predeterminado: `gemini-3.5-flash-lite`.
+
+La elección y sus resultados están documentados en
+[Decisión de arquitectura](docs/decision-arquitectura.md).
+
 Desde la raíz del proyecto, con el entorno virtual activo:
 
 ```bash
@@ -166,15 +171,27 @@ consistencia con la API real.
 
 ## Estado de las pruebas
 
-Se han obtenido respuestas JSON válidas del asistente.
+## Estado de las pruebas
 
-Las corridas de comparación y consistencia del 21 de octubre de 2026
-presentaron errores HTTP 503 y 429. Los registros se conservan
-como evidencia.
+El 22 de octubre de 2026 se completó la comparación de
+`gemini-3.6-flash` y `gemini-3.5-flash-lite`. Se eligió Flash Lite
+por costo y cumplimiento de los requisitos evaluados.
 
-La comparación con un segundo modelo y la validación completa del
-banco de prompts siguen pendientes. No se presentan los fallos
-del servicio como pruebas exitosas.
+El banco ejecutó tres intentos por cada uno de sus tres prompts:
+siete respuestas superaron la validación automática y la revisión
+manual; dos intentos fallaron por HTTP 503 del proveedor.
+
+Las siete pruebas locales del validador JSON también pasaron.
+
+Evidencias:
+
+- [Comparación y decisión](docs/decision-arquitectura.md)
+- [Revisión del banco de prompts](prompts/revision-resultados.md)
+- [Ensayo de instalación limpia](docs/verificacion-instalacion.md)
+- [Revisión de seguridad](docs/verificacion-seguridad.md)
+
+La ejecución funcional final desde el clon de verificación
+está pendiente.
 
 ## Errores frecuentes
 

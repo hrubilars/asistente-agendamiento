@@ -74,7 +74,7 @@ def preparar_consulta(consulta, profesional):
 
 def armar_peticion(
     pregunta,
-    modelo="gemini-3.6-flash",
+    modelo="gemini-3.5-flash-lite",
     system_instruction=None,
 ):
     if not isinstance(pregunta, str) or not pregunta.strip():
@@ -237,7 +237,7 @@ def calcular_costo(datos, precio_entrada, precio_salida):
 
 def obtener_dato_de_prueba(
     pregunta,
-    modelo="gemini-3.6-flash",
+    modelo="gemini-3.5-flash-lite",
     system_instruction=None,
 ):
     url, body = armar_peticion(
@@ -254,10 +254,13 @@ def obtener_dato_de_prueba(
     # Confirmar que la respuesta contiene texto.
     texto = extraer_texto(datos)
 
+    # Tarifas estándar de gemini-3.5-flash-lite:
+    # USD 0.30 por millón de tokens de entrada.
+    # USD 2.50 por millón de tokens de salida y razonamiento.
     costo = calcular_costo(
         datos,
-        precio_entrada=0.00000075,
-        precio_salida=0.00000375,
+        precio_entrada=0.30 / 1_000_000,
+        precio_salida=2.50 / 1_000_000,
     )
 
     print(f"Modelo solicitado: {modelo}")
