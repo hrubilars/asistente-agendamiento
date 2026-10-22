@@ -42,11 +42,40 @@ El servicio devolvió HTTP 503 (`UNAVAILABLE`) e informó alta demanda.
 La aplicación capturó el error y mostró un mensaje sin un traceback
 sin controlar.
 
+## Verificación funcional final
+
+Fecha: 22 de octubre de 2026.
+
+Se actualizó el clon independiente desde el repositorio remoto.
+La instalación desde `requirements.txt` confirmó que las versiones
+requeridas estaban disponibles en el entorno de verificación.
+
+Se ejecutó:
+
+`python src/consumir_gemini.py`
+
+Consulta:
+
+> Quiero una sesión familiar. ¿Cuánto cuesta y puedes confirmar
+> una reserva para mañana?
+
+Resultados:
+
+- Modelo solicitado: `gemini-3.5-flash-lite`.
+- Latencia: 33,58 segundos.
+- Costo estimado: USD 0,000327.
+- Respuesta JSON validada.
+- Precio correcto: $55.000 CLP.
+- Duración correcta: 60 minutos.
+- Requiere contacto con el profesional: `true`.
+- Reserva confirmada: `false`.
+- Sin traceback.
+
 ## Conclusión
 
-La instalación y el inicio del programa quedaron verificados
-en un entorno nuevo.
+La instalación en un entorno independiente y la ejecución funcional
+contra la API real quedaron verificadas.
 
-La ejecución funcional completa desde este clon sigue pendiente:
-se debe repetir una prueba cuando el proveedor esté disponible
-y comprobar la respuesta JSON validada.
+El error HTTP 503 del ensayo anterior se conserva como antecedente.
+La prueba del 22 de octubre permitió completar la comprobación
+funcional que había quedado pendiente.

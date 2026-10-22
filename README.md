@@ -190,8 +190,9 @@ Evidencias:
 - [Ensayo de instalación limpia](docs/verificacion-instalacion.md)
 - [Revisión de seguridad](docs/verificacion-seguridad.md)
 
-La ejecución funcional final desde el clon de verificación
-está pendiente.
+El 22 de octubre de 2026 se completó correctamente la ejecución
+funcional desde el clon de verificación, utilizando Flash Lite
+y obteniendo una respuesta JSON validada.
 
 ## Errores frecuentes
 
