@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram name="Arquitectura Gate 1" id="gate1">
+    <mxGraphModel page="1" pageWidth="1600" pageHeight="1900" grid="1" gridSize="10">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="titulo" value="Asistente de atención y agendamiento — Gate 1&#10;Flujo de src/consumir_gemini.py · 22/10/2026" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f8fafc;strokeColor=#f8fafc;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="40" y="25" width="1520" height="90" />
+        </mxCell>
+        <mxCell id="user" value="Usuario en terminal&#10;input()" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e0f2fe;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="150" width="560" height="80" />
+        </mxCell>
+        <mxCell id="system" value="cargar_datos_profesional()&#10;crear_instrucciones_sistema(profesional)" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e0f2fe;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="290" width="560" height="100" />
+        </mxCell>
+        <mxCell id="catalog" value="src/datos_profesional.json&#10;Servicios, precios y condiciones" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="1130" y="290" width="420" height="100" />
+        </mxCell>
+        <mxCell id="env" value=".env → GEMINI_API_KEY&#10;load_dotenv() + os.getenv()&#10;Se usa en armar_peticion" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fef3c7;strokeColor=#64748b;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="40" y="460" width="370" height="120" />
+        </mxCell>
+        <mxCell id="build" value="armar_peticion()&#10;Consulta y systemInstruction separados&#10;Solicita salida JSON" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="460" width="560" height="120" />
+        </mxCell>
+        <mxCell id="send" value="enviar_peticion(url, body)&#10;requests.post() + control HTTP&#10;respuesta.json() → datos" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="660" width="560" height="120" />
+        </mxCell>
+        <mxCell id="api" value="API de Gemini&#10;gemini-3.5-flash-lite" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dcfce7;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="1130" y="660" width="420" height="120" />
+        </mxCell>
+        <mxCell id="extract" value="extraer_texto(datos)&#10;candidates → content → parts → text" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="880" width="560" height="100" />
+        </mxCell>
+        <mxCell id="cost" value="calcular_costo(datos, precios)&#10;usageMetadata: entrada, salida&#10;y razonamiento" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fef3c7;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="1080" width="560" height="120" />
+        </mxCell>
+        <mxCell id="return" value="obtener_dato_de_prueba()&#10;Muestra modelo, latencia y costo&#10;Devuelve el texto generado" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="1300" width="560" height="110" />
+        </mxCell>
+        <mxCell id="parse" value="parsear_respuesta_json(texto)&#10;json.loads() + claves + tipos&#10;reserva_confirmada debe ser false" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=19;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="1500" width="560" height="120" />
+        </mxCell>
+        <mxCell id="out" value="Terminal: JSON validado&#10;respuesta · requiere_contacto_profesional&#10;reserva_confirmada" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dcfce7;strokeColor=#64748b;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="490" y="1720" width="560" height="110" />
+        </mxCell>
+        <mxCell id="latency" value="Latencia: perf_counter()&#10;Antes y después de enviar_peticion&#10;Medición en obtener_dato_de_prueba" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e0f2fe;strokeColor=#64748b;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="1130" y="870" width="420" height="120" />
+        </mxCell>
+        <mxCell id="errors" value="CONTROL DE ERRORES&#10;&#10;Catálogo&#10;FileNotFoundError / JSONDecodeError&#10;→ RuntimeError&#10;&#10;armar_peticion&#10;Entrada vacía → ValueError&#10;Clave ausente → RuntimeError&#10;&#10;enviar_peticion&#10;Timeout / ConnectionError&#10;RequestException&#10;HTTP ≠ 200 / JSON del servicio inválido&#10;→ RuntimeError&#10;&#10;extraer_texto&#10;KeyError / IndexError → RuntimeError&#10;&#10;calcular_costo&#10;KeyError → RuntimeError&#10;&#10;parsear_respuesta_json&#10;JSONDecodeError / estructura inválida&#10;→ ValueError" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff1f2;strokeColor=#e11d48;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="35" y="690" width="390" height="850" />
+        </mxCell>
+        <mxCell id="catch" value="Bloque principal: try/except&#10;Captura ValueError y RuntimeError&#10;Muestra mensaje de error" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff1f2;strokeColor=#e11d48;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="35" y="1640" width="390" height="160" />
+        </mxCell>
+        <mxCell id="formula" value="ESTIMACIÓN DE COSTO&#10;&#10;entrada × precio_entrada&#10;+ (salida + razonamiento)&#10;× precio_salida&#10;&#10;Tarifas en USD por token&#10;No confirma importe facturado" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fef3c7;strokeColor=#64748b;fontColor=#0f172a;fontSize=17;fontFamily=Helvetica;spacing=10;">
+          <mxGeometry as="geometry" x="1130" y="1080" width="420" height="250" />
+        </mxCell>
+        <mxCell id="e1" value="consulta" edge="1" parent="1" source="user" target="system" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e2" value="catálogo" edge="1" parent="1" source="catalog" target="system" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e3" value="consulta + instrucciones" edge="1" parent="1" source="system" target="build" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e4" value="clave" edge="1" parent="1" source="env" target="build" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e5" value="URL + body" edge="1" parent="1" source="build" target="send" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e6" value="POST" edge="1" parent="1" source="send" target="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e7" value="HTTP + JSON" edge="1" parent="1" source="api" target="send" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e8" value="datos: candidates + usageMetadata" edge="1" parent="1" source="send" target="extract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e9" value="continúa: texto + datos de uso" edge="1" parent="1" source="extract" target="cost" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e10" value="costo calculado + texto" edge="1" parent="1" source="cost" target="return" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e11" value="texto generado" edge="1" parent="1" source="return" target="parse" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e12" value="diccionario validado" edge="1" parent="1" source="parse" target="out" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#475569;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e13" value="excepción propagada" edge="1" parent="1" source="errors" target="catch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=block;strokeColor=#e11d48;fontSize=15;fontFamily=Helvetica;labelBackgroundColor=#f8fafc;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

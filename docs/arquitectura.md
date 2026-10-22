@@ -8,20 +8,9 @@ conectada a Gemini.
 
 ## Diagrama
 
-```mermaid
-flowchart TD
-    D["Catálogo del profesional"] --> S["Crear instrucciones de sistema"]
-    U["Consulta del usuario"] --> P["Armar petición"]
-    S --> P
-    E["Clave local desde .env"] --> P
-    P --> G["API de Gemini"]
-    G --> H{"Respuesta HTTP correcta"}
-    H -->|Sí| T["Extraer texto generado"]
-    H -->|No| F["Mostrar error controlado"]
-    T --> V{"JSON y restricciones válidos"}
-    V -->|Sí| R["Mostrar JSON validado"]
-    V -->|No| F
-```
+![Arquitectura del asistente](diagrama_arquitectura.png)
+
+[Descargar versión editable para draw.io](diagrama_arquitectura.drawio)
 
 ## Componentes
 
