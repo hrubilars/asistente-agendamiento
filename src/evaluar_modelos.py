@@ -19,9 +19,9 @@ MODELOS = {
         "entrada": 0.75,
         "salida": 3.75,
     },
-    "gemini-3.8-flash": {
-        "entrada": 0.75,
-        "salida": 3.75,
+    "gemini-3.5-flash-lite": {
+        "entrada": 0.30,
+        "salida": 2.50,
     },
 }
 
