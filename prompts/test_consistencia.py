@@ -12,7 +12,8 @@ from src.consumir_gemini import (
 )
 
 
-MODELO = "gemini-3.6-flash"
+#MODELO = "gemini-3.6-flash"
+MODELO = "gemini-3.5-flash-lite"
 REPETICIONES = 3
 CARPETA = Path(__file__).resolve().parent
 

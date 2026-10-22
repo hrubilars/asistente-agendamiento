@@ -1,0 +1,36 @@
+{
+  "fecha_utc": "2026-10-22T12:50:24.436800+00:00",
+  "modelo": "gemini-3.5-flash-lite",
+  "repeticiones_por_prompt": 1,
+  "alcance": "Validación automática de JSON, claves, tipos y valores booleanos esperados. La calidad del texto requiere revisión manual.",
+  "prompts": [
+    {
+      "nombre": "consultar_servicios",
+      "system_instruction": "Actúa como asistente de atención de un profesional independiente.\nResponde en español, de forma breve y clara.\nUsa exclusivamente los datos del catálogo proporcionado.\nSi falta información, indícalo y pregunta lo necesario.\nNo inventes servicios, precios ni horarios disponibles.\nNo puedes consultar disponibilidad ni confirmar reservas.\nNo puedes registrar, guardar, tramitar ni enviar solicitudes.\nNo ofrezcas realizar esas acciones ni afirmes haberlas realizado.\nPara concretar una reserva, indica que requiere contacto directo y confirmación del profesional.\nNo inventes datos de contacto que no estén en el catálogo.\nNo solicites datos personales para simular una gestión.\n\nDevuelve exclusivamente un objeto JSON, sin Markdown.\nEl objeto debe contener exactamente estas claves:\n- \"respuesta\": texto de orientación para el usuario.\n- \"requiere_contacto_profesional\": booleano; true cuando la consulta necesita una gestión o confirmación del profesional.\n- \"reserva_confirmada\": booleano; siempre false, porque esta aplicación no confirma reservas.\n\nCATÁLOGO DEL PROFESIONAL:\n{\n  \"nombre\": \"Profesional de ejemplo\",\n  \"especialidad\": \"Fotografía\",\n  \"servicios\": [\n    {\n      \"nombre\": \"Retrato profesional\",\n      \"duracion_minutos\": 45,\n      \"precio_clp\": 35000\n    },\n    {\n      \"nombre\": \"Sesión familiar\",\n      \"duracion_minutos\": 60,\n      \"precio_clp\": 55000\n    }\n  ],\n  \"modalidad\": \"Presencial\",\n  \"politicas\": {\n    \"cancelacion\": \"Solicitar cancelaciones con al menos 24 horas de anticipación.\",\n    \"pago\": \"El pago se coordina directamente con el profesional.\",\n    \"agendamiento\": \"Las solicitudes requieren confirmación del profesional. Esta aplicación no consulta disponibilidad ni confirma reservas.\"\n  }\n}\nPara consultas informativas, presenta los datos solicitados del catálogo sin simular gestiones.",
+      "entrada_usuario": "¿Cuánto cuesta el retrato profesional y cuánto dura?",
+      "estructura_esperada": {
+        "respuesta": "string no vacío",
+        "requiere_contacto_profesional": "boolean",
+        "reserva_confirmada": "boolean, siempre false"
+      },
+      "contacto_esperado": false,
+      "criterio_calidad": "Indica $35.000 CLP y 45 minutos. No inventa servicios ni ofrece registrar solicitudes.",
+      "revision_manual": "pendiente",
+      "exitos": 1,
+      "fallos": 0,
+      "intentos": [
+        {
+          "numero": 1,
+          "valido": true,
+          "texto_generado": "{\n  \"respuesta\": \"El retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.\",\n  \"requiere_contacto_profesional\": false,\n  \"reserva_confirmada\": false\n}",
+          "modelo_respuesta": "gemini-3.5-flash-lite",
+          "respuesta_validada": {
+            "respuesta": "El retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.",
+            "requiere_contacto_profesional": false,
+            "reserva_confirmada": false
+          }
+        }
+      ]
+    }
+  ]
+}
