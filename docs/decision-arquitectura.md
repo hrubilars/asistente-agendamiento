@@ -1,13 +1,13 @@
 # Decisión de arquitectura: elección de modelo
 
-Fecha de evaluación: 21 de octubre de 2026.
+Fecha de evaluación: 22 de octubre de 2026.
 
 Proyecto: Asistente inteligente de atención y agendamiento para
 profesionales independientes.
 
 ## 1. Modelo elegido
 
-Se mantiene provisionalmente `gemini-3.6-flash`.
+Se elige `gemini-3.5-flash-lite`.
 
 La aplicación orienta consultas sobre servicios, precios y condiciones
 de un profesional independiente. Actualmente utiliza un catálogo de
@@ -15,143 +15,156 @@ ejemplo de servicios de fotografía.
 
 Los requisitos principales son:
 
-- Responder en español de forma clara y breve.
-- Usar los servicios, precios y condiciones del catálogo.
-- Solicitar aclaraciones cuando falte información.
+- Responder en español de forma breve y clara.
+- Usar correctamente el catálogo.
+- Preguntar cuando falta información.
 - No inventar disponibilidad ni confirmar reservas.
-- No afirmar que registra o envía solicitudes, porque esas funciones
-  todavía no están implementadas.
+- No afirmar que registra o envía solicitudes.
+- Producir una respuesta JSON que la aplicación pueda validar.
 
 ## 2. Diagrama de arquitectura
 
-El flujo y sus componentes están documentados en
-[Arquitectura del asistente](arquitectura.md).
+Consultar el [diagrama y sus componentes](arquitectura.md).
 
 ## 3. Comparación de candidatos
 
-### Condiciones de prueba
+### Condiciones
 
 Se realizaron cuatro intentos por modelo, alternando los candidatos.
-
-Ambos recibieron la misma consulta, las mismas instrucciones y el mismo
-catálogo. No se configuraron parámetros de generación adicionales:
-se utilizaron los valores predeterminados de cada modelo.
+Ambos recibieron la misma consulta, catálogo e instrucciones.
 
 Consulta:
 
 > Quiero una sesión familiar. ¿Cuánto cuesta y cuánto dura?
 > ¿Puedes confirmar una reserva para mañana a las 10?
 
-La latencia mide la duración de la petición al servicio.
-El promedio incluye únicamente las peticiones que devolvieron texto.
+Esta comparación utilizó `preparar_consulta`, que combina instrucciones,
+catálogo y consulta en un texto. No utilizó el prompt de sistema
+separado ni la salida JSON de la versión actual del asistente.
 
-Un éxito técnico significa que se obtuvo una respuesta con texto;
-no implica automáticamente que esa respuesta cumpla todos los
-requisitos de calidad.
+La validación de la versión actual se realizó por separado con
+el banco de prompts.
 
-### Tarifas de referencia
+Se utilizaron los parámetros de generación predeterminados de
+cada modelo.
 
-Tarifas estándar para texto, en USD por millón de tokens:
+Registro:
+[Resultados de comparación](evaluaciones/comparacion-20261022T130450723449Z.json).
 
-| Criterio | gemini-3.6-flash | gemini-3.8-flash |
+### Tarifas
+
+Tarifas estándar para texto en USD por millón de tokens:
+
+| Criterio | gemini-3.6-flash | gemini-3.5-flash-lite |
 |---|---:|---:|
-| Entrada | 0,75 | 0,75 |
-| Salida, incluido razonamiento | 3,75 | 3,75 |
+| Entrada | 0,75 | 0,30 |
+| Salida, incluido razonamiento | 3,75 | 2,50 |
 
 Fuente: https://ai.google.dev/gemini-api/docs/pricing
 
-Fecha de consulta: 21 de octubre de 2026.
+Fecha de consulta: 22 de octubre de 2026.
 
-Las tarifas indicadas son promocionales hasta el 31 de diciembre
-de 2026. El costo calculado es una estimación equivalente a tarifa
-pagada, no una comprobación del importe efectivamente facturado.
+Las tarifas de 3.6 indicadas son promocionales hasta el
+31 de diciembre de 2026.
 
-### Resultados de la corrida comparativa
+Los costos calculados son estimaciones equivalentes a tarifa pagada.
+No necesariamente representan el importe facturado si se utiliza
+cuota gratuita. No se utilizó caché explícita ni herramientas externas.
 
-Registro:
-[evidencia de la comparación](evaluaciones/comparacion-20261021T150733182382Z.json).
+### Resultados
 
-| Criterio | gemini-3.6-flash | gemini-3.8-flash |
+| Criterio | gemini-3.6-flash | gemini-3.5-flash-lite |
 |---|---|---|
 | Intentos | 4 | 4 |
-| Respuestas con texto | 3 | 0 |
-| Fallos observados | 1 error HTTP 503 | 4 errores HTTP 503 |
-| Latencias exitosas | 22,55; 10,26; 24,01 segundos | Sin datos |
-| Latencia promedio exitosa | 18,94 segundos | No calculable |
-| Costo promedio estimado por respuesta exitosa | Aproximadamente USD 0,003304 | No calculable |
-| Precio y duración correctos | Sí, en las tres respuestas recibidas | No evaluable |
-| Evita confirmar reservas | Sí, en las tres respuestas recibidas | No evaluable |
-| Respeta el límite de no registrar ni enviar solicitudes | Presenta desviaciones que requieren ajustar las instrucciones | No evaluable |
+| Respuestas exitosas | 2 | 3 |
+| Errores HTTP 503 | 2 | 1 |
+| Latencias exitosas, segundos | 8,60; 6,03 | 20,89; 21,39; 20,62 |
+| Latencia promedio exitosa | 7,32 s | 20,97 s |
+| Costo promedio estimado por respuesta exitosa | Aproximadamente USD 0,003744 | Aproximadamente USD 0,000290 |
+| Precio y duración del servicio | Correctos en ambas respuestas | Correctos en las tres respuestas |
+| Confirma una reserva | No | No |
 
-El promedio de costo mostrado se calculó a partir de los importes
-redondeados impresos en consola. El registro JSON conserva mayor
-precisión.
+Los promedios de latencia excluyen los intentos fallidos.
+Los promedios de costo de esta tabla se calcularon a partir de
+los importes redondeados impresos en consola; el registro JSON
+conserva mayor precisión.
 
-Los errores HTTP 503 informaron alta demanda temporal del servicio.
-Los intentos fallidos no se contabilizan como respuestas rápidas ni
-como respuestas gratuitas: su costo no pudo determinarse.
+No se asigna costo cero a los intentos fallidos: su costo no pudo
+determinarse.
 
-### Observaciones de calidad
+### Calidad y limitaciones observadas
 
-Las tres respuestas de `gemini-3.6-flash` indicaron correctamente:
+Ambos modelos indicaron correctamente que la Sesión familiar cuesta
+$55.000 CLP y dura 60 minutos. Ninguno confirmó la reserva.
 
-- Sesión familiar: $55.000 CLP.
-- Duración: 60 minutos.
-- La reserva requiere confirmación del profesional.
+Con las instrucciones antiguas:
 
-Sin embargo, algunas respuestas ofrecieron enviar o registrar la
-solicitud. La aplicación todavía no realiza esas acciones.
+- 3.6 ofreció enviar la solicitud o insinuó que quedaría pendiente
+  para contacto posterior, acciones que la aplicación no realiza.
+- Lite pidió nuevamente fecha y hora aunque ya estaban en la consulta.
 
-Se debe ajustar el prompt para evitar esa afirmación y comprobar
-el cambio con nuevas pruebas.
+Estas observaciones muestran limitaciones de las respuestas bajo
+esas instrucciones. No permiten afirmar que un modelo esté libre
+de errores.
+
+### Prueba del prompt actual
+
+Se probó `gemini-3.5-flash-lite` con tres prompts y tres intentos
+por prompt, usando instrucciones de sistema separadas y salida JSON.
+
+Se obtuvieron siete respuestas válidas y dos errores HTTP 503.
+Las siete respuestas recibidas superaron la validación automática
+y la revisión manual de sus criterios.
+
+Consultar la
+[revisión del banco de prompts](../prompts/revision-resultados.md)
+y su
+[registro real](../prompts/registro-20261022T125255578570Z.json).
+
+No se observaron ofertas de registrar o enviar solicitudes en
+esas siete respuestas.
 
 ## 4. Justificación
 
-Se mantiene provisionalmente `gemini-3.6-flash` porque ya está integrado
-y produjo respuestas útiles para el caso de uso en tres de los cuatro
-intentos de esta corrida.
+Se elige `gemini-3.5-flash-lite` porque ofrece calidad suficiente
+para las consultas acotadas del catálogo, tuvo menor costo
+estimado por respuesta y produjo tres respuestas exitosas frente
+a dos de 3.6 en la corrida comparativa.
 
-La precisión sobre el catálogo y la claridad sobre la confirmación
-de reservas son criterios prioritarios para esta aplicación.
+El criterio de mayor peso es el costo, manteniendo el cumplimiento
+de los requisitos del asistente.
 
-La decisión tiene limitaciones:
+Se acepta una mayor latencia observada: aproximadamente
+20,97 segundos frente a 7,32 segundos de 3.6.
 
-- La muestra es pequeña.
-- Se probó una sola consulta.
-- Hubo fallos del proveedor.
-- No se pudo evaluar la calidad ni el costo por respuesta de 3.8.
-- Se detectaron afirmaciones sobre acciones que el programa no realiza.
+La elección también cuenta con evidencia del banco de prompts
+de la versión actual.
 
-Por ello, esta prueba no demuestra superioridad general de 3.6.
-La elección se revisará cuando el segundo candidato pueda responder
-y se amplíen las pruebas del asistente.
+La muestra es pequeña y hubo alta demanda del proveedor.
+Los resultados no demuestran que Lite sea siempre más disponible
+ni que estas latencias se mantengan en otras condiciones.
 
-## 5. Alternativas no elegidas y motivos
+## 5. Alternativas descartadas y motivos
+
+### gemini-3.6-flash
+
+No se elige como modelo principal porque su mayor costo observado
+no se justifica para las consultas simples evaluadas.
+
+Fue más rápido cuando respondió, por lo que podría reconsiderarse
+si la latencia adquiere mayor prioridad.
 
 ### gemini-3.8-flash
 
-No se adopta por ahora porque los cuatro intentos devolvieron HTTP 503
-por alta demanda y no permitieron verificar su funcionamiento para
-esta aplicación.
+En la corrida del 21 de octubre, los cuatro intentos devolvieron
+HTTP 503. No se obtuvieron respuestas para evaluar su calidad.
 
-Es un descarte provisional por disponibilidad observada en la prueba,
-no por mala calidad demostrada.
+Se descartó de esta selección por indisponibilidad durante
+las pruebas, sin concluir que su calidad sea inferior.
 
 ### gemini-2.5-flash
 
-Fue el segundo candidato inicial. Una prueba de diagnóstico devolvió
-HTTP 404 e informó que el modelo ya no está disponible para usuarios
-nuevos.
+Una prueba de diagnóstico devolvió HTTP 404 e informó que
+el modelo no está disponible para usuarios nuevos.
 
-Registro:
-[diagnóstico de disponibilidad](evaluaciones/comparacion-20261021T150329112265Z.json).
-
-Se descartó por falta de acceso desde esta cuenta. Su presencia en el
-listado de modelos no garantizó que pudiera utilizarse para generar
-contenido.
-
-## Pendiente para cerrar la comparación
-
-- Obtener respuestas de un segundo modelo disponible.
-- Comparar la calidad de las respuestas bajo las mismas condiciones.
-- Actualizar la decisión con los nuevos resultados.
+Se descartó por falta de acceso desde la cuenta utilizada.
