@@ -171,8 +171,6 @@ consistencia con la API real.
 
 ## Estado de las pruebas
 
-## Estado de las pruebas
-
 El 22 de octubre de 2026 se completó la comparación de
 `gemini-3.6-flash` y `gemini-3.5-flash-lite`. Se eligió Flash Lite
 por costo y cumplimiento de los requisitos evaluados.
@@ -217,3 +215,15 @@ y obteniendo una respuesta JSON validada.
 - `.env` está excluido mediante `.gitignore`.
 - `.env.example` contiene únicamente la referencia de configuración.
 - No deben publicarse claves en código, registros ni commits.
+
+## Alcance de esta entrega: Gate 1
+
+Esta entrega implementa la base comprometida en la ficha de
+alineación técnica: una miniaplicación en Python que interpreta
+consultas mediante una API de IA, procesa respuestas y maneja errores.
+
+Se utiliza un profesional de fotografía como caso de ejemplo.
+
+La consulta de documentos con RAG y las herramientas de disponibilidad
+y reserva corresponden a la progresión prevista para Gate 2.
+FastAPI, persistencia, interfaz y Docker se contemplan para Gate 3.

@@ -111,5 +111,5 @@ El procedimiento y sus resultados están en
 
 ## Decisión de modelo
 
-La elección provisional y sus limitaciones están documentadas en
+La elección del modelo y sus limitaciones están documentadas en
 [Decisión de arquitectura](decision-arquitectura.md).
