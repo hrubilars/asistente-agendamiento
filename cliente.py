@@ -1,6 +1,11 @@
 import time
 from typing import Any, Callable
 
+from src.consumir_gemini import (
+    armar_peticion,
+    enviar_peticion,
+    extraer_texto,
+)
 
 def con_reintento(
     funcion: Callable[[], Any],
@@ -31,3 +36,33 @@ def con_reintento(
                 "problema temporal. Reintentando..."
             )
             time.sleep(espera_segundos)
+
+
+def consultar_modelo(
+    pregunta: str,
+    system_instruction: str = "",
+    modelo: str = "gemini-3.5-flash-lite",
+) -> str:
+    """Consulta el modelo con reintentos y devuelve el texto generado."""
+
+    # Reutilizar el módulo existente para construir la petición.
+    url, body = armar_peticion(
+        pregunta,
+        modelo=modelo,
+        system_instruction=system_instruction,
+    )
+
+    try:
+        # Reintentar solo el envío, conservando la misma petición.
+        datos = con_reintento(
+            lambda: enviar_peticion(url, body)
+        )
+    except TimeoutError:
+        # Entregar un mensaje claro cuando se agotan los intentos.
+        raise RuntimeError(
+            "El servicio no respondió tras varios intentos. "
+            "Intenta más tarde."
+        ) from None
+
+    # Extraer el texto después de recibir una respuesta exitosa.
+    return extraer_texto(datos)
