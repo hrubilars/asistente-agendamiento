@@ -110,6 +110,9 @@ def armar_peticion(
 
 
 def enviar_peticion(url, body):
+    """Envía la petición y clasifica los errores para decidir si reintentar."""
+
+    # Un timeout o un problema de conexión puede ser temporal.
     try:
         respuesta = requests.post(
             url,
@@ -117,11 +120,11 @@ def enviar_peticion(url, body):
             timeout=(10, 90),
         )
     except requests.exceptions.Timeout:
-        raise RuntimeError(
+        raise TimeoutError(
             "Se agotó el tiempo de espera del servicio."
         ) from None
     except requests.exceptions.ConnectionError:
-        raise RuntimeError(
+        raise TimeoutError(
             "No se pudo conectar con el servicio."
         ) from None
     except requests.exceptions.RequestException:
@@ -129,7 +132,7 @@ def enviar_peticion(url, body):
             "No se pudo completar la petición al servicio."
         ) from None
 
-    # Revisar el código HTTP antes de procesar la respuesta.
+    # Revisar el estado HTTP antes de procesar una respuesta exitosa.
     if respuesta.status_code != 200:
         try:
             error_api = respuesta.json().get("error", {})
@@ -137,18 +140,32 @@ def enviar_peticion(url, body):
         except (ValueError, AttributeError):
             detalle = "El servicio no entregó detalles en JSON."
 
+        # Evitar que la clave aparezca en el mensaje de error.
         clave = os.getenv("GEMINI_API_KEY")
         if clave:
             detalle = detalle.replace(clave, "[CLAVE OCULTA]")
 
+        # Conservar la espera sugerida por el proveedor, si existe.
         espera = respuesta.headers.get("Retry-After")
         if espera:
             detalle += f" | Retry-After: {espera}"
 
-        raise RuntimeError(
-            f"HTTP {respuesta.status_code}: {detalle}"
-        )
+        mensaje = f"HTTP {respuesta.status_code}: {detalle}"
 
+        # Reintentar no corrige una credencial inválida o sin permisos.
+        if respuesta.status_code in (401, 403):
+            raise ValueError(
+                "Credencial inválida o sin permiso. "
+                "Revisa GEMINI_API_KEY y los permisos del proyecto."
+            )
+
+        # Usamos TimeoutError para identificar fallos potencialmente temporales.
+        if respuesta.status_code == 429 or 500 <= respuesta.status_code < 600:
+            raise TimeoutError(mensaje)
+
+        raise RuntimeError(mensaje)
+
+    # Una respuesta HTTP exitosa también debe contener un objeto JSON válido.
     try:
         datos = respuesta.json()
     except ValueError:
@@ -301,5 +318,6 @@ if __name__ == "__main__":
             ensure_ascii=False,
         ))
 
-    except (ValueError, RuntimeError) as error:
+    # Mostrar los errores controlados sin imprimir un traceback al usuario.
+    except (ValueError, RuntimeError, TimeoutError) as error:
         print("No se pudo completar la operación:", error)
