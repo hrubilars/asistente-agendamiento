@@ -12,7 +12,9 @@ El catálogo actual contiene datos de ejemplo de servicios de fotografía.
 - Orientar solicitudes incompletas.
 - Separar las instrucciones del sistema del mensaje del usuario.
 - Solicitar respuestas JSON y validar claves, tipos y restricciones.
-- Mostrar latencia y costo estimado.
+- Mostrar el tiempo total de consulta mediante el cliente modular.
+- Mostrar latencia y costo estimado mediante el módulo del Gate 1.
+- Reintentar fallos temporales con un límite de tres intentos.
 - Informar errores de conexión, tiempo de espera y errores HTTP.
 - Comparar modelos y ejecutar pruebas de consistencia.
 
@@ -78,7 +80,7 @@ La elección y sus resultados están documentados en
 Desde la raíz del proyecto, con el entorno virtual activo:
 
 ```bash
-python src/consumir_gemini.py
+python main.py
 ```
 
 Ejemplo de consulta:
@@ -88,8 +90,17 @@ Ejemplo de consulta:
 ```
 
 Si la petición funciona y la respuesta supera la validación,
-la consola muestra el modelo solicitado, la latencia, el costo
-estimado y el JSON validado.
+la consola muestra el tiempo total de consulta y el JSON validado.
+
+El tiempo total incluye las peticiones y las esperas entre reintentos.
+El registro de costos del cliente modular se incorporará en el bloque 13.
+
+El módulo original del Gate 1 conserva la ejecución directa con
+modelo solicitado, latencia y costo estimado:
+
+```bash
+python src/consumir_gemini.py
+```
 
 La respuesta contiene:
 
@@ -216,14 +227,71 @@ y obteniendo una respuesta JSON validada.
 - `.env.example` contiene únicamente la referencia de configuración.
 - No deben publicarse claves en código, registros ni commits.
 
-## Alcance de esta entrega: Gate 1
+## Alcance entregado en Gate 1
 
-Esta entrega implementa la base comprometida en la ficha de
-alineación técnica: una miniaplicación en Python que interpreta
-consultas mediante una API de IA, procesa respuestas y maneja errores.
+La versión entregada en Gate 1 implementó la base comprometida
+en la ficha de alineación técnica: una miniaplicación en Python
+que interpreta consultas mediante una API de IA, procesa respuestas
+y maneja errores.
 
 Se utiliza un profesional de fotografía como caso de ejemplo.
 
 La consulta de documentos con RAG y las herramientas de disponibilidad
 y reserva corresponden a la progresión prevista para Gate 2.
 FastAPI, persistencia, interfaz y Docker se contemplan para Gate 3.
+
+## Cliente modular — Bloque 12
+
+El asistente se ejecuta desde la raíz del proyecto:
+
+```bash
+python main.py
+```
+
+`main.py` carga el catálogo del profesional, construye las instrucciones
+de sistema, consulta el modelo mediante el cliente modular y valida
+el JSON antes de mostrarlo.
+
+### Organización
+
+- `main.py`: interacción con el usuario y validación de la respuesta.
+- `cliente.py`: función pública `consultar_modelo` y función
+  reutilizable `con_reintento`.
+- `src/consumir_gemini.py`: construcción de peticiones, comunicación
+  HTTP y extracción del texto generado.
+
+### Manejo de errores y reintentos
+
+- HTTP 401/403: produce `ValueError`, sin reintentar.
+- HTTP 429, HTTP 5xx, errores de conexión y timeout:
+  producen `TimeoutError` y permiten reintentos.
+- Otros errores HTTP o respuestas inválidas:
+  producen `RuntimeError`, sin reintentar automáticamente.
+
+El cliente realiza hasta tres intentos en total, con una espera fija
+de dos segundos entre intentos fallidos. Se detiene inmediatamente
+cuando obtiene una respuesta exitosa.
+
+Si agota los intentos, informa:
+“El servicio no respondió tras varios intentos. Intenta más tarde.”
+
+La espera fija no garantiza resolver una cuota agotada. El encabezado
+`Retry-After`, cuando existe, se conserva en el detalle del error;
+todavía no modifica automáticamente la espera.
+
+### Verificación realizada
+
+Se verificaron mediante simulaciones, sin llamadas a la API:
+
+- Recuperación después de dos fallos temporales.
+- Propagación de credenciales inválidas sin reintentos.
+- Detención al agotar los intentos.
+- Integración de estos comportamientos en `consultar_modelo`.
+
+También se realizó una consulta real mediante `python main.py`,
+con respuesta JSON válida sobre la sesión familiar:
+55.000 CLP, 60 minutos y reserva no confirmada.
+
+El tiempo total mostrado incluye las peticiones y las esperas entre
+reintentos. El registro de costos del nuevo cliente se incorporará
+en el bloque 13.
