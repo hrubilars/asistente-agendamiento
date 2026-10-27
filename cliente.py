@@ -4,9 +4,22 @@ from typing import Any, Callable
 
 from src.consumir_gemini import (
     armar_peticion,
+    calcular_costo,
     enviar_peticion,
     extraer_texto,
 )
+
+# Tarifas por millón configuradas actualmente en el proyecto.
+# Son referenciales y deben revisarse si cambian los precios del proveedor.
+TARIFAS_MODELOS = {
+    "gemini-3.5-flash-lite": {
+        "entrada": 0.30 / 1_000_000,
+        "salida": 2.50 / 1_000_000,
+    },
+}
+
+# Se reinicia cada vez que se inicia nuevamente el programa.
+costo_total_sesion = 0.0
 
 def con_reintento(
     funcion: Callable[[], Any],
@@ -52,6 +65,43 @@ def con_reintento(
             time.sleep(espera_con_jitter)
 
 
+def registrar_costo(datos: dict, modelo: str) -> float | None:
+    """Calcula y acumula el costo estimado de una consulta."""
+
+    global costo_total_sesion
+
+    # Evitar aplicar la tarifa de un modelo a otro distinto.
+    tarifas = TARIFAS_MODELOS.get(modelo)
+
+    if tarifas is None:
+        print(
+            f"Costo estimado no disponible: "
+            f"no hay tarifas configuradas para {modelo}."
+        )
+        return None
+
+    try:
+        # Reutilizar el cálculo de entrada, salida y razonamiento.
+        costo = calcular_costo(
+            datos,
+            precio_entrada=tarifas["entrada"],
+            precio_salida=tarifas["salida"],
+        )
+    except (RuntimeError, TypeError):
+        # La consulta puede responder aunque falten datos de uso.
+        print(
+            "Costo estimado no disponible: "
+            "la respuesta no contiene datos de uso suficientes."
+        )
+        return None
+
+    costo_total_sesion += costo
+
+    print(f"Costo estimado de la operación: ${costo:.6f} USD")
+    print(f"Costo acumulado de la sesión: ${costo_total_sesion:.6f} USD")
+
+    return costo
+
 def consultar_modelo(
     pregunta: str,
     system_instruction: str = "",
@@ -77,6 +127,9 @@ def consultar_modelo(
             "El servicio no respondió tras varios intentos. "
             "Intenta más tarde."
         ) from None
+
+    # Registrar el uso después de recibir la respuesta de la API.
+    registrar_costo(datos, modelo)
 
     # Extraer el texto después de recibir una respuesta exitosa.
     return extraer_texto(datos)
