@@ -13,8 +13,9 @@ El catálogo actual contiene datos de ejemplo de servicios de fotografía.
 - Separar las instrucciones del sistema del mensaje del usuario.
 - Solicitar respuestas JSON y validar claves, tipos y restricciones.
 - Mostrar el tiempo total de consulta mediante el cliente modular.
+- Estimar el costo de cada operación y acumularlo durante la sesión.
 - Mostrar latencia y costo estimado mediante el módulo del Gate 1.
-- Reintentar fallos temporales con un límite de tres intentos.
+- Reintentar fallos temporales con backoff exponencial y jitter.
 - Informar errores de conexión, tiempo de espera y errores HTTP.
 - Comparar modelos y ejecutar pruebas de consistencia.
 
@@ -89,11 +90,21 @@ Ejemplo de consulta:
 ¿Cuánto cuesta el retrato profesional y cuánto dura?
 ```
 
-Si la petición funciona y la respuesta supera la validación,
-la consola muestra el tiempo total de consulta y el JSON validado.
+Cuando se recibe una respuesta de la API, el cliente muestra el costo
+estimado de la operación y el costo acumulado de la sesión, siempre que
+existan tarifas configuradas y datos de uso suficientes.
 
-El tiempo total incluye las peticiones y las esperas entre reintentos.
-El registro de costos del cliente modular se incorporará en el bloque 13.
+Si además la respuesta supera la validación, la consola muestra el
+tiempo total de consulta y el JSON validado. El tiempo total incluye
+las peticiones y las esperas entre reintentos.
+
+El acumulado se mantiene mientras el programa está en ejecución y se
+reinicia al iniciarlo nuevamente. En la ejecución actual de `main.py`
+se realiza una consulta por sesión.
+
+Si no se puede calcular el costo de una operación, se informa en
+pantalla y esa operación no se suma al acumulado. Por ello, el total
+solo incluye los costos que se pudieron estimar.
 
 El módulo original del Gate 1 conserva la ejecución directa con
 modelo solicitado, latencia y costo estimado:
@@ -240,7 +251,7 @@ La consulta de documentos con RAG y las herramientas de disponibilidad
 y reserva corresponden a la progresión prevista para Gate 2.
 FastAPI, persistencia, interfaz y Docker se contemplan para Gate 3.
 
-## Cliente modular — Bloque 12
+## Cliente modular — Bloques 12 y 13
 
 El asistente se ejecuta desde la raíz del proyecto:
 
@@ -255,8 +266,7 @@ el JSON antes de mostrarlo.
 ### Organización
 
 - `main.py`: interacción con el usuario y validación de la respuesta.
-- `cliente.py`: función pública `consultar_modelo` y función
-  reutilizable `con_reintento`.
+- `cliente.py`: consulta del modelo, reintentos y registro de costos.
 - `src/consumir_gemini.py`: construcción de peticiones, comunicación
   HTTP y extracción del texto generado.
 
@@ -268,14 +278,19 @@ el JSON antes de mostrarlo.
 - Otros errores HTTP o respuestas inválidas:
   producen `RuntimeError`, sin reintentar automáticamente.
 
-El cliente realiza hasta tres intentos en total, con una espera fija
-de dos segundos entre intentos fallidos. Se detiene inmediatamente
-cuando obtiene una respuesta exitosa.
+El cliente realiza hasta tres intentos en total. Entre fallos
+temporales utiliza backoff exponencial: con la configuración
+predeterminada, la espera comienza en dos segundos y aumenta en el
+siguiente reintento. Se agrega una variación aleatoria o jitter y se
+respeta una espera máxima de 30 segundos.
+
+El cliente se detiene inmediatamente cuando obtiene una respuesta
+exitosa y no espera después del último intento.
 
 Si agota los intentos, informa:
 “El servicio no respondió tras varios intentos. Intenta más tarde.”
 
-La espera fija no garantiza resolver una cuota agotada. El encabezado
+Los reintentos no garantizan resolver una cuota agotada. El encabezado
 `Retry-After`, cuando existe, se conserva en el detalle del error;
 todavía no modifica automáticamente la espera.
 
@@ -292,6 +307,11 @@ También se realizó una consulta real mediante `python main.py`,
 con respuesta JSON válida sobre la sesión familiar:
 55.000 CLP, 60 minutos y reserva no confirmada.
 
-El tiempo total mostrado incluye las peticiones y las esperas entre
-reintentos. El registro de costos del nuevo cliente se incorporará
-en el bloque 13.
+El 27 de octubre de 2026 se realizó un ensayo de diez consultas reales.
+Todas respondieron correctamente y el costo estimado acumulado fue de
+USD $0,000265. No se observó un error 429 durante ese ensayo.
+
+También se verificaron mediante simulaciones las esperas exponenciales
+y el registro de costos, sin realizar llamadas a la API.
+
+El detalle está en el [registro del ensayo](docs/evaluaciones/ensayo-rate-limit.md).
