@@ -41,7 +41,7 @@ def con_reintento(
             # Si la operación funciona, devolver el resultado de inmediato.
             return funcion()
 
-        except TimeoutError:
+        except TimeoutError as error:
             # En el último intento se propaga el error sin esperar otra vez.
             if intento == intentos:
                 raise
@@ -56,10 +56,10 @@ def con_reintento(
             jitter = random.uniform(0, espera * 0.1)
             espera_con_jitter = min(espera + jitter, espera_maxima)
 
+            # Mostrar el motivo permite identificar el código HTTP observado.
             print(
-                f"Intento {intento} de {intentos} falló por un "
-                f"problema temporal. Reintentando en "
-                f"{espera_con_jitter:.2f} segundos..."
+                f"Intento {intento} de {intentos} falló: {error}. "
+                f"Reintentando en {espera_con_jitter:.2f} segundos..."
             )
 
             time.sleep(espera_con_jitter)
