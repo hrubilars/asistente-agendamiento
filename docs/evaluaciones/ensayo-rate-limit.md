@@ -33,3 +33,25 @@ Se verificó el mecanismo de reintentos sin llamadas a la API:
 
 Estas pruebas simuladas complementan el ensayo real, pero no lo
 sustituyen como evidencia de un error 429 real.
+
+## Segundo ensayo — 28 de octubre de 2026
+
+Se realizaron consultas cortas con el cliente modular y un envoltorio
+que contabilizó las solicitudes HTTP y los errores 429 sin sustituir
+la comunicación real con Gemini.
+
+- Modelo solicitado: `gemini-3.5-flash-lite`.
+- Consultas iniciadas: 10.
+- Consultas exitosas: 10.
+- Consultas fallidas: 0.
+- Solicitudes HTTP, incluidos reintentos: 10.
+- Errores HTTP 429 observados: 0.
+- Costo estimado registrado: USD $0,000064.
+
+No se activaron reintentos. Este ensayo confirma el funcionamiento
+de las consultas y del registro de costos, pero no demuestra una
+recuperación frente a un límite de uso real.
+
+La clasificación de un HTTP 429 y el comportamiento de los reintentos
+se verificaron mediante pruebas automatizadas con mocks. La evidencia
+de un 429 real solicitada por la lección sigue pendiente.
