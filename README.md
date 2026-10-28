@@ -191,6 +191,32 @@ incorrectos, texto vacío y confirmaciones de reserva.
 No realizan llamadas al proveedor ni sustituyen las pruebas de
 consistencia con la API real.
 
+## Pruebas automatizadas del cliente — Bloque 14
+
+Ejecutar desde la raíz del proyecto:
+
+```bash
+python -m pytest test_cliente.py -v
+```
+
+La suite ejecuta 12 casos y cubre:
+
+- Clasificación de errores HTTP y respuesta exitosa.
+- Recuperación tras fallos temporales.
+- Propagación de errores no reintentables.
+- Agotamiento de intentos.
+- Cálculo y acumulación del costo estimado.
+- Conversión y propagación de errores en `consultar_modelo`.
+
+Utiliza mocks para sustituir las llamadas HTTP y las esperas.
+No necesita una API key ni consume tokens.
+
+Para ejecutar también las pruebas del validador JSON:
+
+```bash
+python -m pytest test_cliente.py tests/test_validacion_json.py -v
+```
+
 ## Estado de las pruebas
 
 El 22 de octubre de 2026 se completó la comparación de
