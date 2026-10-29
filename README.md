@@ -257,6 +257,7 @@ y obteniendo una respuesta JSON validada.
 
 - [Arquitectura del asistente](docs/arquitectura.md)
 - [Decisión de modelo y resultados](docs/decision-arquitectura.md)
+- [Visión del producto](docs/vision-producto.md)
 
 ## Seguridad
 
