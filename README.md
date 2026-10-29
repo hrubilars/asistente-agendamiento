@@ -342,3 +342,26 @@ También se verificaron mediante simulaciones las esperas exponenciales
 y el registro de costos, sin realizar llamadas a la API.
 
 El detalle está en el [registro del ensayo](docs/evaluaciones/ensayo-rate-limit.md).
+
+## Procesamiento de texto — Bloque 15
+
+`pipeline_texto.py` contiene las funciones de limpieza, tokenización
+y conteo de palabras.
+
+Pruebas locales, sin llamadas a la API:
+
+```bash
+python -m pytest test_pipeline_texto.py -v
+```
+
+Evaluación de tres respuestas reales del asistente contra referencias:
+
+```bash
+python evaluar_pipeline_texto.py
+```
+
+Esta evaluación consume tokens y guarda un registro nuevo en
+`docs/evaluaciones/`. Compara el texto antes y después de procesarlo;
+la coincidencia de palabras no garantiza que la respuesta sea correcta.
+
+Consultar la [revisión de resultados](docs/evaluaciones/revision-pipeline.md).

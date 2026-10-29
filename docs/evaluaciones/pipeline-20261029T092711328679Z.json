@@ -1,0 +1,46 @@
+{
+  "fecha_utc": "2026-10-29T09:27:11.328679+00:00",
+  "modelo_solicitado": "gemini-3.5-flash-lite",
+  "descripcion_metrica": "Proporción de palabras únicas de la referencia presentes en la respuesta.",
+  "resultados": [
+    {
+      "nombre": "retrato_profesional",
+      "consulta": "¿Cuánto cuesta el retrato profesional y cuánto dura?",
+      "referencia": "El retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.",
+      "estado": "correcto",
+      "respuesta_json": {
+        "respuesta": "El servicio de Retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.",
+        "requiere_contacto_profesional": false,
+        "reserva_confirmada": false
+      },
+      "coincidencia_cruda": 0.9230769230769231,
+      "coincidencia_procesada": 1.0
+    },
+    {
+      "nombre": "sesion_familiar",
+      "consulta": "¿Cuánto cuesta la sesión familiar y cuánto dura?",
+      "referencia": "La sesión familiar cuesta $55.000 CLP y tiene una duración de 60 minutos.",
+      "estado": "correcto",
+      "respuesta_json": {
+        "respuesta": "La Sesión familiar tiene un valor de $55.000 CLP y una duración de 60 minutos. Para concretar una reserva, se requiere contacto directo y confirmación del profesional.",
+        "requiere_contacto_profesional": true,
+        "reserva_confirmada": false
+      },
+      "coincidencia_cruda": 0.8461538461538461,
+      "coincidencia_procesada": 0.9230769230769231
+    },
+    {
+      "nombre": "confirmacion_reserva",
+      "consulta": "¿Puedes confirmar una reserva para mañana a las 10?",
+      "referencia": "No puedo consultar disponibilidad ni confirmar reservas. Para concretar una reserva, se requiere contacto directo y confirmación del profesional.",
+      "estado": "correcto",
+      "respuesta_json": {
+        "respuesta": "No puedo consultar disponibilidad ni confirmar reservas. Para concretar una reserva, requiere contacto directo y confirmación del profesional.",
+        "requiere_contacto_profesional": true,
+        "reserva_confirmada": false
+      },
+      "coincidencia_cruda": 0.9473684210526315,
+      "coincidencia_procesada": 0.9473684210526315
+    }
+  ]
+}
