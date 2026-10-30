@@ -1,0 +1,43 @@
+{
+  "fecha_calculo_utc": "2026-10-30T13:09:47.768222+00:00",
+  "archivo_origen": "pipeline-20261029T092711328679Z.json",
+  "fecha_respuestas_utc": "2026-10-29T09:27:11.328679+00:00",
+  "modelo_solicitado": "gemini-3.5-flash-lite",
+  "nuevas_llamadas_api": false,
+  "descripcion": "Coincidencia léxica con repeticiones. Los promedios se calculan por caso y no garantizan exactitud factual ni equivalencia de significado.",
+  "casos_evaluados": 3,
+  "resumen": {
+    "precision_promedio": 0.7703703703703703,
+    "cobertura_promedio": 0.9568151147098516,
+    "f1_promedio": 0.8338481338481339
+  },
+  "resultados_ordenados_por_f1": [
+    {
+      "nombre": "sesion_familiar",
+      "consulta": "¿Cuánto cuesta la sesión familiar y cuánto dura?",
+      "referencia": "La sesión familiar cuesta $55.000 CLP y tiene una duración de 60 minutos.",
+      "respuesta": "La Sesión familiar tiene un valor de $55.000 CLP y una duración de 60 minutos. Para concretar una reserva, se requiere contacto directo y confirmación del profesional.",
+      "precision": 0.4444444444444444,
+      "cobertura": 0.9230769230769231,
+      "f1": 0.6
+    },
+    {
+      "nombre": "retrato_profesional",
+      "consulta": "¿Cuánto cuesta el retrato profesional y cuánto dura?",
+      "referencia": "El retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.",
+      "respuesta": "El servicio de Retrato profesional cuesta $35.000 CLP y tiene una duración de 45 minutos.",
+      "precision": 0.8666666666666667,
+      "cobertura": 1.0,
+      "f1": 0.9285714285714286
+    },
+    {
+      "nombre": "confirmacion_reserva",
+      "consulta": "¿Puedes confirmar una reserva para mañana a las 10?",
+      "referencia": "No puedo consultar disponibilidad ni confirmar reservas. Para concretar una reserva, se requiere contacto directo y confirmación del profesional.",
+      "respuesta": "No puedo consultar disponibilidad ni confirmar reservas. Para concretar una reserva, requiere contacto directo y confirmación del profesional.",
+      "precision": 1.0,
+      "cobertura": 0.9473684210526315,
+      "f1": 0.972972972972973
+    }
+  ]
+}

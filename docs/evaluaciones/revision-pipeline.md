@@ -26,7 +26,8 @@ respuesta original en el registro.
   Usa una redacción diferente de la referencia, sin alterar esos datos.
 - Confirmación de reserva: no afirma consultar disponibilidad ni
   confirmar una reserva. Presenta un defecto de escritura:
-  `delprofesional`, sin espacio.
+  La respuesta omite `se` antes de `requiere`; es un detalle de
+  redacción que no cambia el límite informado.
 
 ## Interpretación y límites
 

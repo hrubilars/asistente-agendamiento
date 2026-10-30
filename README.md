@@ -365,3 +365,25 @@ Esta evaluación consume tokens y guarda un registro nuevo en
 la coincidencia de palabras no garantiza que la respuesta sea correcta.
 
 Consultar la [revisión de resultados](docs/evaluaciones/revision-pipeline.md).
+
+## Métricas de texto — Bloque 16
+
+`metricas_texto.py` calcula coincidencias con repeticiones,
+precisión, cobertura y F1.
+
+Pruebas locales:
+
+```bash
+python -m pytest test_metricas_texto.py -v
+```
+
+Calcular métricas sobre las tres respuestas reales guardadas:
+
+```bash
+python evaluar_metricas_texto.py
+```
+
+Este comando no realiza nuevas llamadas a la API. Guarda las métricas,
+sus promedios y los casos ordenados por F1 en un registro nuevo.
+
+Consultar la [revisión de métricas](docs/evaluaciones/revision-metricas.md).
