@@ -387,3 +387,18 @@ Este comando no realiza nuevas llamadas a la API. Guarda las métricas,
 sus promedios y los casos ordenados por F1 en un registro nuevo.
 
 Consultar la [revisión de métricas](docs/evaluaciones/revision-metricas.md).
+
+## Revisión cualitativa — Bloque 17
+
+Se generaron veinte respuestas reales con métricas de texto.
+Se revisaron diez casos: cinco con menor F1 y cinco con mayor F1,
+aplicando corrección factual, completitud y contradicción.
+
+La revisión fue realizada con apoyo de IA y validada por el autor.
+
+- [Resultados](docs/evaluaciones/core17-resultados.json)
+- [Revisión manual](docs/evaluaciones/core17-revision-manual.json)
+- [Límites de la métrica](docs/limites_metrica.md)
+
+`revision_manual.py` registra las valoraciones acordadas y no
+realiza llamadas a la API ni sustituye la lectura de los casos.
