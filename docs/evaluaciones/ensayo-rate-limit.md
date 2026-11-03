@@ -53,5 +53,58 @@ de las consultas y del registro de costos, pero no demuestra una
 recuperación frente a un límite de uso real.
 
 La clasificación de un HTTP 429 y el comportamiento de los reintentos
-se verificaron mediante pruebas automatizadas con mocks. La evidencia
-de un 429 real solicitada por la lección sigue pendiente.
+se verificaron inicialmente mediante pruebas automatizadas con mocks.
+Posteriormente se observó un HTTP 429 real durante el ensayo del core 17,
+como se documenta a continuación.
+
+## HTTP 429 real durante el core 17 — 31 de octubre de 2026
+
+Durante la generación de veinte respuestas con el modelo
+`gemini-3.5-flash-lite`, se completaron y guardaron dieciséis casos.
+Al consultar el caso 17, el proveedor respondió HTTP 429
+con estado RESOURCE_EXHAUSTED.
+
+El detalle del error informó un límite de quince solicitudes
+por minuto para el proyecto y modelo en el nivel gratuito.
+Este límite corresponde a lo informado en esa ejecución;
+no se considera una cuota universal ni permanente.
+
+### Reintentos observados
+
+- Después del primer fallo, el cliente esperó 2,17 segundos.
+- Después del segundo fallo, esperó 4,32 segundos.
+- Al agotarse los tres intentos, informó un error controlado.
+- El evaluador conservó las dieciséis respuestas y registró el fallo.
+
+El proveedor sugería inicialmente una espera aproximada de
+24 segundos. Las esperas aplicadas por nuestro backoff fueron
+insuficientes para superar el límite en esa consulta.
+
+El cliente conserva Retry-After cuando existe, pero todavía no
+ajusta automáticamente la espera a ese encabezado ni al campo
+retryDelay del cuerpo de la respuesta.
+
+### Reanudación
+
+En una ejecución posterior, el evaluador omitió los casos 01–16,
+consultó los casos 17–20 y completó veinte respuestas con JSON
+validado, conservando el registro del fallo anterior.
+
+Esto demuestra persistencia del avance y reanudación manual
+exitosa. No demuestra recuperación automática exitosa dentro
+de los tres intentos de la consulta fallida.
+
+El costo acumulado de sesión se reinicia al ejecutar nuevamente
+el programa; el acumulado de la segunda ejecución no representa
+por sí solo el costo total de ambas ejecuciones.
+
+### Evidencia y alcance
+
+- [Registro del core 17](core17-resultados.json):
+  contiene veinte resultados y un fallo del caso 17.
+- Los códigos HTTP, las esperas y el detalle de cuota se observaron
+  en la salida de terminal compartida durante el trabajo.
+- El JSON conserva el mensaje final resumido del fallo, no el detalle
+  completo del HTTP 429 ni los mensajes de cada reintento.
+
+No se realizaron nuevas llamadas a la API para escribir este informe.
