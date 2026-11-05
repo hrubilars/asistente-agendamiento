@@ -1,5 +1,8 @@
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -47,12 +50,34 @@ def respuesta_general(_datos):
         "reserva_confirmada": False,
     }
 
+def respuesta_respaldo_agendamiento(_datos):
+    """Orienta al usuario cuando falla la ruta de agendamiento."""
+    # Registra la activación sin guardar la consulta ni detalles del proveedor.
+    logger.warning("Falló la ruta de agendamiento; se activó el respaldo.")
+    return {
+        "respuesta": (
+            "No pude procesar tu consulta de agendamiento en este momento. "
+            "Para consultar horarios o concretar una reserva, "
+            "contacta directamente al profesional."
+        ),
+        "requiere_contacto_profesional": True,
+        "reserva_confirmada": False,
+    }
+
+
+def construir_cadena_agendamiento_segura(cadena_agendamiento):
+    """Añade un respaldo a la cadena de agendamiento."""
+    return cadena_agendamiento.with_fallbacks(
+        [RunnableLambda(respuesta_respaldo_agendamiento)]
+    )
 
 def construir_asistente_enrutado():
     """Conecta el clasificador y las rutas con las cadenas existentes."""
     # construir_cadena() carga la configuración local de Gemini.
     catalogo = construir_cadena() | RunnableLambda(parsear_respuesta_json)
-    agendamiento = componer_cadena(*construir_pasos())
+    agendamiento = construir_cadena_agendamiento_segura(
+    componer_cadena(*construir_pasos())
+    )
 
     plantilla = ChatPromptTemplate.from_messages([
         (
@@ -84,6 +109,21 @@ def construir_asistente_enrutado():
         clasificar, catalogo, agendamiento, RunnableLambda(respuesta_general)
     )
 
+def procesar_mensaje_seguro(cadena, mensaje):
+    """Devuelve una respuesta segura si falla el flujo de consulta."""
+    try:
+        return cadena.invoke({"consulta": mensaje})
+    except Exception as error:
+        # Registra el tipo de fallo sin guardar la consulta ni detalles del proveedor.
+        logger.error("Falló la orquestación: %s", type(error).__name__)
+        return {
+            "respuesta": (
+                "No pude procesar tu consulta en este momento. "
+                "Intenta nuevamente más tarde."
+            ),
+            "requiere_contacto_profesional": False,
+            "reserva_confirmada": False,
+        }
 
 def main():
     """Ejecuta una consulta con el asistente enrutado."""
@@ -92,7 +132,7 @@ def main():
         raise ValueError("La consulta no puede estar vacía.")
 
     asistente = construir_asistente_enrutado()
-    resultado = asistente.invoke({"consulta": consulta})
+    resultado = procesar_mensaje_seguro(asistente, consulta)
     print("\nJSON validado:")
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
 
