@@ -4,7 +4,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.tools import tool
+from langchain_core.tools import StructuredTool, tool
+from pydantic import BaseModel, Field
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from cadena_asistente import MODELO
@@ -21,20 +22,38 @@ def normalizar(texto: str) -> str:
     )
     return " ".join(sin_tildes.split())
 
+class ArgumentosConsultaServicio(BaseModel):
+    """Define qué datos puede enviar el agente a esta herramienta."""
 
-def consultar_servicio(nombre: str) -> str:
-    """Consulta el precio y la duración de un servicio de fotografía por nombre."""
+    nombre: str = Field(
+        min_length=1,
+        description="Nombre del servicio, por ejemplo: Sesión familiar.",
+    )
+    incluir_duracion: bool = Field(
+        default=False,
+        description="Usa true cuando la persona también pregunta cuánto dura.",
+    )
+
+
+def consultar_servicio(nombre: str, incluir_duracion: bool = False) -> str:
+    """Consulta el precio de un servicio y, cuando se solicita, su duración."""
     catalogo = cargar_datos_profesional()
+    nombre_buscado = normalizar(nombre)
 
     for servicio in catalogo["servicios"]:
-        if normalizar(servicio["nombre"]) == normalizar(nombre):
-            precio = f"{servicio['precio_clp']:,}".replace(",", ".")
-            return (
-                f"{servicio['nombre']}: ${precio} CLP, "
-                f"{servicio['duracion_minutos']} minutos."
-            )
+        if normalizar(servicio["nombre"]) != nombre_buscado:
+            continue
 
-    disponibles = ", ".join(servicio["nombre"] for servicio in catalogo["servicios"])
+        precio = f"{servicio['precio_clp']:,}".replace(",", ".")
+        respuesta = f"{servicio['nombre']}: ${precio} CLP"
+
+        # La opción cambia el dato que devuelve la herramienta.
+        if incluir_duracion:
+            respuesta += f", {servicio['duracion_minutos']} minutos"
+
+        return respuesta + "."
+
+    disponibles = ", ".join(s["nombre"] for s in catalogo["servicios"])
     return f"No encontré ese servicio. Servicios del catálogo: {disponibles}."
 
 
@@ -49,6 +68,13 @@ def consultar_politica(tema: str) -> str:
 
     return "No encontré esa política. Puedes consultar por pago, cancelación o agendamiento."
 
+def crear_herramienta_servicio():
+    """Expone la función al agente con su esquema de argumentos."""
+    return StructuredTool.from_function(
+        func=consultar_servicio,
+        args_schema=ArgumentosConsultaServicio,
+    )
+
 def construir_agente():
     """Conecta Gemini con las dos herramientas de solo lectura."""
     load_dotenv(Path(__file__).resolve().parent / ".env")
@@ -57,7 +83,7 @@ def construir_agente():
         raise ValueError("Falta configurar GEMINI_API_KEY en el archivo .env.")
 
     # Expone las funciones al agente sin cambiar cómo se prueban por separado.
-    herramientas = [tool(consultar_servicio), tool(consultar_politica)]
+    herramientas = [crear_herramienta_servicio(), tool(consultar_politica)]
     modelo = ChatGoogleGenerativeAI(
         model=MODELO,
         api_key=clave,
@@ -79,7 +105,9 @@ def construir_agente():
             "No inventes precios, políticas ni disponibilidad. "
             "No puedes consultar la agenda ni crear, confirmar, cambiar o "
             "cancelar reservas. Si solicitan una gestión, indica que deben "
-            "contactar directamente al profesional.",
+            "contactar directamente al profesional."
+            "Usa incluir_duracion=true si la persona pregunta por la duración; "
+            "si solo pregunta por el precio, puedes omitir ese argumento. ",
         ),
         ("human", "{entrada}"),
         # Aquí el agente recibe los resultados de sus llamadas anteriores.
@@ -124,6 +152,11 @@ def main():
         print("No se usaron herramientas.")
     for numero, (accion, observacion) in enumerate(pasos, start=1):
         print(f"{numero}. {accion.tool}: {observacion}")
+        if accion.tool == "consultar_servicio":
+            argumentos = accion.tool_input
+            if isinstance(argumentos, dict):
+                opcion = argumentos.get("incluir_duracion", "omitido")
+                print(f"   incluir_duracion: {opcion}")
 
     print("\nRespuesta:")
     texto = extraer_texto_respuesta(resultado["output"])
