@@ -5,3 +5,4 @@ langchain==1.4.8
 langchain-core==1.7.4
 langchain-google-genai==4.4.2
 pydantic==2.14.1
+langchain-classic==1.0.8

@@ -13,6 +13,10 @@ from unicodedata import normalize
 
 from src.consumir_gemini import cargar_datos_profesional
 
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables.history import RunnableWithMessageHistory
+
 
 def normalizar(texto: str) -> str:
     """Permite comparar nombres aunque tengan mayúsculas o tildes."""
@@ -105,10 +109,11 @@ def construir_agente():
             "No inventes precios, políticas ni disponibilidad. "
             "No puedes consultar la agenda ni crear, confirmar, cambiar o "
             "cancelar reservas. Si solicitan una gestión, indica que deben "
-            "contactar directamente al profesional."
+            "contactar directamente al profesional. "
             "Usa incluir_duracion=true si la persona pregunta por la duración; "
             "si solo pregunta por el precio, puedes omitir ese argumento. ",
         ),
+        MessagesPlaceholder(variable_name="historial", optional=True),
         ("human", "{entrada}"),
         # Aquí el agente recibe los resultados de sus llamadas anteriores.
         MessagesPlaceholder(variable_name="agent_scratchpad"),
@@ -138,29 +143,60 @@ def extraer_texto_respuesta(salida: str | list) -> str:
     ]
     return "\n".join(textos)
 
+def construir_agente_con_memoria(ejecutor):
+    """Guarda un historial separado para cada sesión."""
+    historiales = {}
+
+    def obtener_historial(session_id: str):
+        if session_id not in historiales:
+            historiales[session_id] = InMemoryChatMessageHistory()
+        return historiales[session_id]
+
+    def preparar_salida(resultado):
+        # Guarda solo el texto de la respuesta y conserva la traza aparte.
+        texto = extraer_texto_respuesta(resultado["output"])
+        return {**resultado, "output": texto}
+
+    return RunnableWithMessageHistory(
+        ejecutor | RunnableLambda(preparar_salida),
+        obtener_historial,
+        input_messages_key="entrada",
+        history_messages_key="historial",
+        output_messages_key="output",
+    )
+
 def main():
-    consulta = input("Escribe tu consulta: ").strip()
-    if not consulta:
-        print("La consulta no puede estar vacía.")
-        return
+    agente = construir_agente_con_memoria(construir_agente())
+    config = {"configurable": {"session_id": "terminal"}}
 
-    resultado = construir_agente().invoke({"entrada": consulta})
+    print("Asistente de fotografía. Escribe /salir para terminar.")
 
-    print("\nTraza de herramientas:")
-    pasos = resultado["intermediate_steps"]
-    if not pasos:
-        print("No se usaron herramientas.")
-    for numero, (accion, observacion) in enumerate(pasos, start=1):
-        print(f"{numero}. {accion.tool}: {observacion}")
-        if accion.tool == "consultar_servicio":
-            argumentos = accion.tool_input
-            if isinstance(argumentos, dict):
-                opcion = argumentos.get("incluir_duracion", "omitido")
-                print(f"   incluir_duracion: {opcion}")
+    while True:
+        consulta = input("\nEscribe tu consulta: ").strip()
 
-    print("\nRespuesta:")
-    texto = extraer_texto_respuesta(resultado["output"])
-    print(texto or "No se recibió una respuesta de texto.")
+        if consulta.lower() == "/salir":
+            break
+        if not consulta:
+            continue
+
+        # El mismo agente y el mismo ID mantienen el historial entre turnos.
+        resultado = agente.invoke({"entrada": consulta}, config=config)
+
+        print("\nTraza de herramientas:")
+        pasos = resultado["intermediate_steps"]
+        if not pasos:
+            print("No se usaron herramientas.")
+
+        for numero, (accion, observacion) in enumerate(pasos, start=1):
+            print(f"{numero}. {accion.tool}: {observacion}")
+            if accion.tool == "consultar_servicio":
+                argumentos = accion.tool_input
+                if isinstance(argumentos, dict):
+                    opcion = argumentos.get("incluir_duracion", "omitido")
+                    print(f"   incluir_duracion: {opcion}")
+
+        print("\nRespuesta:")
+        print(resultado["output"] or "No se recibió una respuesta de texto.")
 
 
 if __name__ == "__main__":
