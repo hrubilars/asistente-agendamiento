@@ -1,0 +1,65 @@
+Fecha (UTC): 2026-11-17T13:19:49.688768+00:00
+Configuración: k=2, chunk_size=300, chunk_overlap=30
+Colección: fotografia | Embeddings: models/gemini-embedding-001
+
+Caso 01: ¿Cuánto sale una sesión de fotos para mi familia?
+  IDs esperados: 773cd96e-0cc7-4eb0-bbd1-d401ad9da618
+  IDs recuperados: 773cd96e-0cc7-4eb0-bbd1-d401ad9da618, 38ba08ca-2410-4b5c-9af3-da6a1d432108
+  Fuentes recuperadas: docs/corpus/sesion-familiar.md, docs/corpus/retrato-profesional.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 02: ¿La sesión familiar es presencial y cuánto dura?
+  IDs esperados: 773cd96e-0cc7-4eb0-bbd1-d401ad9da618
+  IDs recuperados: 773cd96e-0cc7-4eb0-bbd1-d401ad9da618, 38ba08ca-2410-4b5c-9af3-da6a1d432108
+  Fuentes recuperadas: docs/corpus/sesion-familiar.md, docs/corpus/retrato-profesional.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 03: ¿Cuánto cuesta un retrato profesional?
+  IDs esperados: 38ba08ca-2410-4b5c-9af3-da6a1d432108
+  IDs recuperados: 38ba08ca-2410-4b5c-9af3-da6a1d432108, 773cd96e-0cc7-4eb0-bbd1-d401ad9da618
+  Fuentes recuperadas: docs/corpus/retrato-profesional.md, docs/corpus/sesion-familiar.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 04: ¿Con cuánto tiempo tengo que avisar si no puedo ir?
+  IDs esperados: 368f3473-9b42-42bf-ad35-3da6d91a502a
+  IDs recuperados: 368f3473-9b42-42bf-ad35-3da6d91a502a, 2701a157-cbca-4100-abdb-f68cccef0a82
+  Fuentes recuperadas: docs/corpus/cancelaciones.md, docs/corpus/agendamiento.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 05: ¿Con quién debo gestionar una cancelación?
+  IDs esperados: 368f3473-9b42-42bf-ad35-3da6d91a502a
+  IDs recuperados: 368f3473-9b42-42bf-ad35-3da6d91a502a, 2701a157-cbca-4100-abdb-f68cccef0a82
+  Fuentes recuperadas: docs/corpus/cancelaciones.md, docs/corpus/agendamiento.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 06: ¿Cómo se coordina el pago del servicio?
+  IDs esperados: 7519bfc7-c1e9-4a61-b7f2-40cfd06ffdb7
+  IDs recuperados: 7519bfc7-c1e9-4a61-b7f2-40cfd06ffdb7, 2701a157-cbca-4100-abdb-f68cccef0a82
+  Fuentes recuperadas: docs/corpus/pagos.md, docs/corpus/agendamiento.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 07: ¿Qué tengo que hacer para que mi hora quede confirmada?
+  IDs esperados: 2701a157-cbca-4100-abdb-f68cccef0a82
+  IDs recuperados: 2701a157-cbca-4100-abdb-f68cccef0a82, 368f3473-9b42-42bf-ad35-3da6d91a502a
+  Fuentes recuperadas: docs/corpus/agendamiento.md, docs/corpus/cancelaciones.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 08: ¿Puedes ver si hay disponibilidad el viernes y reservarme una hora?
+  IDs esperados: 2701a157-cbca-4100-abdb-f68cccef0a82
+  IDs recuperados: 2701a157-cbca-4100-abdb-f68cccef0a82, 368f3473-9b42-42bf-ad35-3da6d91a502a
+  Fuentes recuperadas: docs/corpus/agendamiento.md, docs/corpus/cancelaciones.md
+  Precisión=0.500 | Recall=1.000 | F1=0.667
+
+Caso 09: ¿Cuál de los dos servicios es más barato y cuánto dura cada uno?
+  IDs esperados: 38ba08ca-2410-4b5c-9af3-da6a1d432108, 773cd96e-0cc7-4eb0-bbd1-d401ad9da618
+  IDs recuperados: 38ba08ca-2410-4b5c-9af3-da6a1d432108, 773cd96e-0cc7-4eb0-bbd1-d401ad9da618
+  Fuentes recuperadas: docs/corpus/retrato-profesional.md, docs/corpus/sesion-familiar.md
+  Precisión=1.000 | Recall=1.000 | F1=1.000
+
+Caso 10: ¿Cuál es la dirección exacta del estudio?
+  IDs esperados: ninguno
+  IDs recuperados: 2701a157-cbca-4100-abdb-f68cccef0a82, 38ba08ca-2410-4b5c-9af3-da6a1d432108
+  Fuentes recuperadas: docs/corpus/agendamiento.md, docs/corpus/retrato-profesional.md
+  Precisión=0.000 | Recall=n/a | F1=n/a
+
+Promedios: precisión=0.500 (10 casos) | recall=1.000 | F1=0.704 (9 casos con fuente)
