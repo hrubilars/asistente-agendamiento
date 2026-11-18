@@ -1,5 +1,15 @@
 """Funciones para instrumentar el flujo RAG del asistente."""
 
+import argparse
+import json
+import os
+
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+from indexar_corpus import INDICE, RAIZ
+from recuperar_corpus import abrir_indice
+
 from datetime import datetime, timezone
 
 from langchain_core.output_parsers import StrOutputParser
@@ -142,3 +152,85 @@ def registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         # embedding de la pregunta. No inventamos ese consumo ni su costo.
         "costo_embedding_estimado_usd": None,
     }
+
+def guardar_registro(registro):
+    """Agrega una consulta al archivo JSONL sin borrar las anteriores."""
+    carpeta = RAIZ / "docs" / "evaluaciones"
+    carpeta.mkdir(parents=True, exist_ok=True)
+    archivo = carpeta / "registros_latencia_costo.jsonl"
+
+    # Cada línea contiene un objeto JSON completo e independiente.
+    # "a" significa agregar al final, sin sobrescribir otras corridas.
+    with archivo.open("a", encoding="utf-8") as salida:
+        salida.write(json.dumps(registro, ensure_ascii=False) + "\n")
+
+    return archivo
+
+
+def main():
+    """Ejecuta una consulta real y guarda su respuesta, tiempos y consumo."""
+    parser = argparse.ArgumentParser(
+        description="Registra la latencia y el consumo del asistente RAG."
+    )
+    parser.add_argument("pregunta")
+    parser.add_argument("--k", type=int, default=2)
+    args = parser.parse_args()
+
+    pregunta = args.pregunta.strip()
+    if not pregunta or args.k < 1:
+        parser.error("Escribe una pregunta y usa un --k mayor o igual a 1.")
+
+    # Revisamos los requisitos locales antes de llamar al proveedor.
+    if not (INDICE / "chroma.sqlite3").is_file():
+        raise SystemExit("No encontré el índice local en vectorstore/.")
+
+    load_dotenv(RAIZ / ".env")
+    clave = os.getenv("GEMINI_API_KEY")
+    if not clave:
+        raise SystemExit("Falta GEMINI_API_KEY en el archivo .env.")
+
+    try:
+        almacen = abrir_indice(clave)
+        modelo = ChatGoogleGenerativeAI(
+            model=MODELO,
+            api_key=clave,
+            vertexai=False,
+            timeout=90,
+            max_retries=0,
+        )
+
+        # Este paso sí hace las llamadas reales:
+        # embedding de la pregunta y generación con el contexto recuperado.
+        registro = registrar_consulta(
+            almacen,
+            modelo,
+            pregunta,
+            k=args.k,
+            nombre_modelo=MODELO,
+        )
+    except Exception as error:
+        # No imprimimos la petición ni detalles que puedan contener la clave.
+        # Una operación fallida no se guarda como una consulta exitosa.
+        raise SystemExit(
+            f"No se completó la consulta ({type(error).__name__}). "
+            "Revisa la conexión, la cuota o la configuración."
+        ) from None
+
+    # La consulta ya terminó. Distinguimos un fallo de escritura
+    # de un fallo del proveedor, porque no conviene repetirla innecesariamente.
+    try:
+        archivo = guardar_registro(registro)
+    except OSError:
+        print(json.dumps(registro, ensure_ascii=False, indent=2))
+        raise SystemExit(
+            "La consulta terminó, pero no se pudo guardar el registro. "
+            "Conserva la salida y revisa los permisos de docs/evaluaciones/."
+        ) from None
+
+    print(json.dumps(registro, ensure_ascii=False, indent=2))
+    print(f"\nRegistro guardado en: {archivo}")
+
+
+# Importar este módulo para una prueba no ejecuta consultas.
+if __name__ == "__main__":
+    main()
