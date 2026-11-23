@@ -88,8 +88,19 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
 
     # Etapa 1: Gemini genera el embedding de la pregunta y Chroma
     # busca los fragmentos localmente. No recalculamos el corpus.
+    # Registramos el inicio antes de llamar al recuperador.
+    # Si falla, el log permitirá identificar la etapa pendiente.
+    registrar_evento("recuperacion_iniciada", k=k)
+
     with medir(tiempos, "embed_y_busqueda"):
         fragmentos = recuperar_fragmentos(almacen, pregunta, k=k)
+
+    # Guardamos cantidades y tiempo, sin copiar los documentos al log.
+    registrar_evento(
+        "recuperacion_finalizada",
+        fragmentos_recuperados=len(fragmentos),
+        tiempo_ms=round(tiempos["embed_y_busqueda"] * 1000, 2),
+    )
 
     respuesta = SIN_INFORMACION
     fuentes = {}
@@ -112,11 +123,32 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
                 "contexto": contexto,
             })
 
+        # El contenido del prompt no se escribe en el log.
+        # Registramos su contexto como longitud y cantidad de fuentes.
+        registrar_evento(
+            "prompt_preparado",
+            contexto_len=len(contexto),
+            fuentes_disponibles=len(mapa_citas),
+            tiempo_ms=round(tiempos["armado_prompt"] * 1000, 2),
+        )
+
         # Etapa 3: conservamos el mensaje completo, incluidos los tokens.
         # Si encadenáramos directamente StrOutputParser, solo quedaría texto.
+        # Este evento indica que estamos a punto de llamar al modelo.
+        registrar_evento(
+            "generacion_iniciada",
+            modelo=nombre_modelo,
+        )
+
         with medir(tiempos, "generacion"):
             mensaje = modelo.invoke(prompt)
 
+        # Recibir un mensaje no significa que su contenido ya sea válido.
+        # La extracción del texto y la validación de citas siguen después.
+        registrar_evento(
+            "generacion_finalizada",
+            tiempo_ms=round(tiempos["generacion"] * 1000, 2),
+        )
         generacion_ejecutada = True
         metadata_uso = getattr(mensaje, "usage_metadata", None)
         uso = dict(metadata_uso) if metadata_uso else None
