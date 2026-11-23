@@ -22,6 +22,15 @@ from responder_corpus import SIN_INFORMACION, construir_prompt, validar_citas
 from contextlib import contextmanager
 from time import perf_counter
 
+import logging
+
+from logging_rag import (
+    configurar_logger,
+    contexto_consulta,
+    generar_huella,
+    registrar_evento,
+)
+
 
 @contextmanager
 def medir(tiempos, etapa):
@@ -65,7 +74,7 @@ def calcular_costo_consulta(uso, tarifas):
         + salida * tarifas["salida"]
     )
 
-def registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
+def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
     """Ejecuta el RAG y devuelve su respuesta junto con tiempos y consumo."""
     pregunta = pregunta.strip()
     if not pregunta:
@@ -153,6 +162,83 @@ def registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         "costo_embedding_estimado_usd": None,
     }
 
+def registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
+    """Ejecuta una consulta y correlaciona sus eventos de logging."""
+    # Validamos antes de registrar datos de la consulta.
+    if not isinstance(pregunta, str) or not pregunta.strip():
+        raise ValueError("La pregunta debe ser un texto no vacío.")
+
+    if type(k) is not int or k < 1:
+        raise ValueError("k debe ser un entero mayor o igual a 1.")
+
+    pregunta = pregunta.strip()
+
+    # Todos los eventos emitidos dentro de este bloque comparten trace_id.
+    # Al salir, el contexto se restaura incluso si ocurre un error.
+    with contexto_consulta() as identificador:
+        registrar_evento(
+            "consulta_iniciada",
+            pregunta_len=len(pregunta),
+            pregunta_huella=generar_huella(pregunta),
+            k=k,
+        )
+
+        try:
+            # Reutilizamos la implementación que ya funciona:
+            # recuperación, prompt, generación, citas y medición de consumo.
+            registro = _registrar_consulta(
+                almacen,
+                modelo,
+                pregunta,
+                k=k,
+                nombre_modelo=nombre_modelo,
+            )
+        except Exception as error:
+            # Guardamos el tipo de error, no su mensaje completo:
+            # el mensaje podría contener datos de la petición.
+            registrar_evento(
+                "consulta_fallida",
+                nivel=logging.ERROR,
+                tipo_error=type(error).__name__,
+            )
+            raise
+
+        # El identificador también queda en el resultado para relacionarlo
+        # con los eventos operativos de esta consulta.
+        registro["trace_id"] = identificador
+
+        if registro["generacion_ejecutada"]:
+            uso = registro["tokens"] or {}
+
+            registrar_evento(
+                "consumo_llm",
+                modelo=nombre_modelo,
+                input_tokens=uso.get("input_tokens"),
+                output_tokens=uso.get("output_tokens"),
+                total_tokens=uso.get("total_tokens"),
+                costo_generacion_estimado_usd=registro[
+                    "costo_generacion_estimado_usd"
+                ],
+            )
+        else:
+            # La abstención sin generación no debe aparentar una llamada
+            # al modelo ni un consumo de tokens observado.
+            registrar_evento(
+                "generacion_omitida",
+                motivo="sin_fragmentos",
+            )
+
+        registrar_evento(
+            "consulta_finalizada",
+            fragmentos_recuperados=registro["fragmentos_recuperados"],
+            fuentes_citadas=len(registro["fuentes_citadas"]),
+            abstencion=registro["abstencion"],
+            tiempo_total_ms=registro["tiempo_total_ms"],
+        )
+
+        return registro
+
+
 def guardar_registro(registro):
     """Agrega una consulta al archivo JSONL sin borrar las anteriores."""
     carpeta = RAIZ / "docs" / "evaluaciones"
@@ -188,6 +274,9 @@ def main():
     clave = os.getenv("GEMINI_API_KEY")
     if not clave:
         raise SystemExit("Falta GEMINI_API_KEY en el archivo .env.")
+
+    # Los logs operativos se guardan en la carpeta excluida de Git.
+    configurar_logger(archivo=RAIZ / "logs" / "rag.jsonl")
 
     try:
         almacen = abrir_indice(clave)
