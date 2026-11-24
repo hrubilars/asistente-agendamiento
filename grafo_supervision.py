@@ -2,6 +2,7 @@
 
 import json
 import uuid
+from prompt_activo import aplicar_decision, cargar_version_activa
 
 from typing import TypedDict
 
@@ -93,12 +94,17 @@ def main():
         }
     }
 
+    # Si ya existe una versión aprobada, esa es nuestra versión actual.
+    # Sin selección local, el asistente sigue utilizando su prompt base.
+    activa = cargar_version_activa()
+    numero_actual = activa["version"] if activa else 1
+
     estado_inicial = {
-        "version_actual": 1,
+        "version_actual": numero_actual,
         "version_propuesta": propuesta["version"],
         "huella_propuesta": propuesta["huella"],
         "aprobado": False,
-        "version_seleccionada": 1,
+        "version_seleccionada": numero_actual,
     }
 
     pausado = grafo.invoke(estado_inicial, config=config)
@@ -129,9 +135,16 @@ def main():
         config=config,
     )
 
+    # Esta operación ocurre después de resolver la pausa humana.
+    # Una aprobación guarda la selección; un rechazo no cambia nada.
+    aplicar_decision(resultado)
+
     print("\nDecisión:", "aprobada" if resultado["aprobado"] else "rechazada")
     print("Versión seleccionada:", resultado["version_seleccionada"])
-    print("El prompt del RAG todavía no se ha modificado.")
+    if resultado["aprobado"]:
+        print("Versión activada para las próximas consultas del RAG.")
+    else:
+        print("Se conserva la versión anterior del RAG.")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,9 @@ from recuperar_corpus import abrir_indice, formatear_contexto, recuperar_fragmen
 
 from seguridad_rag import filtrar_documentos_sospechosos
 
+from langchain_core.messages import SystemMessage
+from prompt_activo import cargar_version_activa
+
 
 # Usamos una frase fija para reconocer el caso en que el asistente
 # admite que la información no está en los documentos.
@@ -21,7 +24,7 @@ SIN_INFORMACION = "No tengo información suficiente en los documentos para respo
 
 def construir_prompt():
     """Prepara una plantilla con las reglas, la pregunta y el contexto."""
-    return ChatPromptTemplate.from_messages([
+    plantilla = ChatPromptTemplate.from_messages([
         (
             # Las reglas se mantienen iguales para todas las consultas.
             "system",
@@ -44,6 +47,19 @@ def construir_prompt():
     ]).partial(sin_informacion=SIN_INFORMACION)
     # partial() deja fijada la frase de abstención. Al ejecutar la cadena,
     # solo tendremos que pasar la pregunta y el contexto.
+
+    # Sin una versión aprobada mantenemos el comportamiento original.
+    version_activa = cargar_version_activa()
+    if version_activa is None:
+        return plantilla
+
+    # SystemMessage recibe el texto literalmente.
+    # Así, unas llaves dentro del prompt no se interpretan
+    # como variables adicionales de una plantilla.
+    return ChatPromptTemplate.from_messages([
+        SystemMessage(content=version_activa["texto"]),
+        plantilla.messages[1],
+    ])
 
 
 def validar_citas(respuesta, mapa_citas):

@@ -23,3 +23,4 @@ Thumbs.db
 /vectorstore/
 credenciales.json
 /logs/
+/.local/
