@@ -31,6 +31,8 @@ from logging_rag import (
     registrar_evento,
 )
 
+from seguridad_rag import filtrar_documentos_sospechosos
+
 
 @contextmanager
 def medir(tiempos, etapa):
@@ -102,6 +104,20 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         tiempo_ms=round(tiempos["embed_y_busqueda"] * 1000, 2),
     )
 
+    # Filtramos antes de numerar: así ninguna cita puede apuntar
+    # a un documento que decidimos excluir del contexto.
+    fragmentos_aceptados, fragmentos_descartados = (
+        filtrar_documentos_sospechosos(fragmentos)
+    )
+
+    # Registramos cantidades, sin guardar textos ni instrucciones
+    # sospechosas en los logs operativos.
+    registrar_evento(
+        "documentos_filtrados",
+        aceptados=len(fragmentos_aceptados),
+        descartados=len(fragmentos_descartados),
+    )
+
     respuesta = SIN_INFORMACION
     fuentes = {}
     uso = None
@@ -113,11 +129,13 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
     generacion_ejecutada = False
     costo_generacion = 0.0
 
-    if fragmentos:
+    # Solo generamos si queda evidencia después del filtro.
+    if fragmentos_aceptados:
         # Etapa 2: reutilizamos el contexto numerado y el mismo prompt.
         # Las reglas del sistema siguen separadas de la consulta.
         with medir(tiempos, "armado_prompt"):
-            contexto, mapa_citas = formatear_contexto(fragmentos)
+            # Reconstruimos numeración y fuentes solo con los aceptados.
+            contexto, mapa_citas = formatear_contexto(fragmentos_aceptados)
             prompt = construir_prompt().invoke({
                 "pregunta": pregunta,
                 "contexto": contexto,
@@ -177,6 +195,8 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         "modelo_solicitado": nombre_modelo,
         "k": k,
         "fragmentos_recuperados": len(fragmentos),
+        "fragmentos_aceptados": len(fragmentos_aceptados),
+        "fragmentos_descartados": len(fragmentos_descartados),
         "ids_recuperados": [doc.id for doc in fragmentos],
         "respuesta": respuesta,
         "fuentes_citadas": fuentes,
@@ -257,7 +277,7 @@ def registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
             # al modelo ni un consumo de tokens observado.
             registrar_evento(
                 "generacion_omitida",
-                motivo="sin_fragmentos",
+                motivo="sin_fragmentos_utilizables",
             )
 
         registrar_evento(

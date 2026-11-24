@@ -11,6 +11,8 @@ from cadena_asistente import MODELO
 from indexar_corpus import INDICE, RAIZ
 from recuperar_corpus import abrir_indice, formatear_contexto, recuperar_fragmentos
 
+from seguridad_rag import filtrar_documentos_sospechosos
+
 
 # Usamos una frase fija para reconocer el caso en que el asistente
 # admite que la información no está en los documentos.
@@ -74,6 +76,9 @@ def responder(almacen, modelo, pregunta, k=2):
     # Primera llamada a Gemini: convertir la pregunta en un embedding.
     # Chroma usa ese vector para buscar hasta k fragmentos en el índice existente.
     fragmentos = recuperar_fragmentos(almacen, pregunta, k=k)
+    # Revisamos los documentos antes de construir el contexto.
+    # Conservamos únicamente los aceptados para generar y citar.
+    fragmentos, _ = filtrar_documentos_sospechosos(fragmentos)
 
     # Si Chroma no devuelve nada, podemos responder sin llamar
     # al modelo de generación.
