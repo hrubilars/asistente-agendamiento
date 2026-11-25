@@ -1,0 +1,136 @@
+{
+  "tipo": "ensayo real desde clon limpio",
+  "commit_verificado": "3d24f7b",
+  "consulta": {
+    "timestamp": "2026-11-25T13:43:01.028570+00:00",
+    "pregunta": "¿Cuánto cuesta la sesión familiar y cuánto dura?",
+    "modelo_solicitado": "gemini-3.5-flash-lite",
+    "k": 2,
+    "fragmentos_recuperados": 2,
+    "fragmentos_aceptados": 2,
+    "fragmentos_descartados": 0,
+    "ids_recuperados": [
+      "bd957eb8-6a4d-4912-8bc5-af81487eb28b",
+      "55f24b64-5cd8-41b4-866b-f8a71a197f23"
+    ],
+    "respuesta": "La sesión familiar dura 60 minutos y cuesta $55.000 CLP [1].",
+    "fuentes_citadas": {
+      "1": "docs/corpus/sesion-familiar.md"
+    },
+    "abstencion": false,
+    "generacion_ejecutada": true,
+    "tiempos_ms": {
+      "embed_y_busqueda": 1158.29,
+      "armado_prompt": 7.42,
+      "generacion": 5012.95
+    },
+    "tiempo_total_ms": 6180.78,
+    "tokens": {
+      "input_tokens": 295,
+      "output_tokens": 21,
+      "total_tokens": 316,
+      "input_token_details": {
+        "cache_read": 0
+      }
+    },
+    "costo_generacion_estimado_usd": 0.000141,
+    "costo_embedding_estimado_usd": null,
+    "trace_id": "trace-702cadc7e0e84d91964862c49df645a4"
+  },
+  "eventos_operativos": [
+    {
+      "timestamp": "2026-11-25T13:43:01.028414+00:00",
+      "nivel": "INFO",
+      "evento": "consulta_iniciada",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "pregunta_len": 48,
+        "pregunta_huella": "ca54a8673d6bca3edff08211dab23372c2a898ed55544103256d9e95fbd91a2e",
+        "k": 2
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:01.028579+00:00",
+      "nivel": "INFO",
+      "evento": "recuperacion_iniciada",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "k": 2
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:02.186962+00:00",
+      "nivel": "INFO",
+      "evento": "recuperacion_finalizada",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "fragmentos_recuperados": 2,
+        "tiempo_ms": 1158.29
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:02.187720+00:00",
+      "nivel": "INFO",
+      "evento": "documentos_filtrados",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "aceptados": 2,
+        "descartados": 0
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:02.195265+00:00",
+      "nivel": "INFO",
+      "evento": "prompt_preparado",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "contexto_len": 250,
+        "fuentes_disponibles": 2,
+        "tiempo_ms": 7.42
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:02.195453+00:00",
+      "nivel": "INFO",
+      "evento": "generacion_iniciada",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "modelo": "gemini-3.5-flash-lite"
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:07.208509+00:00",
+      "nivel": "INFO",
+      "evento": "generacion_finalizada",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "tiempo_ms": 5012.95
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:07.209357+00:00",
+      "nivel": "INFO",
+      "evento": "consumo_llm",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "modelo": "gemini-3.5-flash-lite",
+        "input_tokens": 295,
+        "output_tokens": 21,
+        "total_tokens": 316,
+        "costo_generacion_estimado_usd": 0.000141
+      }
+    },
+    {
+      "timestamp": "2026-11-25T13:43:07.209537+00:00",
+      "nivel": "INFO",
+      "evento": "consulta_finalizada",
+      "trace_id": "trace-702cadc7e0e84d91964862c49df645a4",
+      "datos": {
+        "fragmentos_recuperados": 2,
+        "fuentes_citadas": 1,
+        "abstencion": false,
+        "tiempo_total_ms": 6180.78
+      }
+    }
+  ]
+}

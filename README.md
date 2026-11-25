@@ -215,8 +215,12 @@ Los reintentos del cliente HTTP de la versión inicial no se aplican
 automáticamente al RAG: sus modelos de chat están configurados
 con max_retries=0.
 
-El ensayo final de instalación limpia del Gate 2 está pendiente
-de ejecutar y documentar.
+El 25 de noviembre de 2026 se completó el ensayo de instalación
+limpia del Gate 2 sobre el commit 3d24f7b: instalación, 18 pruebas,
+indexación, reapertura, actualización sin cambios, aprobación
+del prompt y consulta real con citas y logs.
+
+Consultar la [verificación del ensayo](docs/verificacion-instalacion-gate2.md).
 
 ## Funcionalidades del asistente con catálogo JSON
 
@@ -241,8 +245,7 @@ La reserva requiere contacto directo y confirmación del profesional.
 ## Requisitos
 
 - Python 3.14.8, utilizado durante el desarrollo y en el ensayo
-  de instalación del Gate 1. El ensayo limpio del Gate 2
-  está pendiente de completar.
+  de instalación del Gate 1 y 2.
 - Git.
 - Conexión a internet.
 - Una clave de Gemini con acceso y cuota para el modelo utilizado.
