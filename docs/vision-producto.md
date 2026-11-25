@@ -27,18 +27,29 @@ estas capacidades ya estén implementadas.
 
 ## Estado actual
 
-El asistente funciona desde una terminal y permite:
+El proyecto funciona desde terminal e incluye:
 
-- Consultar un catálogo de ejemplo.
-- Orientar consultas mediante Gemini.
-- Separar instrucciones de sistema y mensajes del usuario.
-- Solicitar y validar respuestas JSON.
-- Manejar errores y reintentar fallos temporales.
-- Estimar costos por operación y acumularlos durante la sesión.
-- Ejecutar pruebas automatizadas del cliente y del validador.
+- Cliente de Gemini con manejo de errores, reintentos y costos estimados.
+- Consultas al catálogo y validación de respuestas JSON.
+- Agente con herramientas del catálogo y memoria durante la sesión.
+- RAG sobre cinco documentos de demostración.
+- Índice Chroma persistente con verificación y actualización incremental.
+- Respuestas documentales con citas y abstención cuando falta información.
+- Revisión de preguntas y filtrado de documentos sospechosos.
+- Evaluación de recuperación mediante precisión, recall y F1.
+- Logs JSON correlacionados mediante trace_id.
+- Medición de tiempos, tokens y costo estimado de generación.
+- Versionado de prompts y aprobación humana mediante LangGraph.
+- Pruebas automatizadas y un ensayo desde un clon limpio.
 
-Actualmente no consulta disponibilidad real ni registra, envía
-o confirma reservas.
+Estas capacidades tienen diferentes entradas de ejecución, documentadas
+en el README. Todavía no forman una única interfaz de producto.
+
+El agente con memoria consulta el catálogo JSON. Su integración con
+el RAG documental sigue pendiente como mejora opcional.
+
+Actualmente no consulta disponibilidad real ni registra, envía,
+modifica, cancela o confirma reservas.
 
 ## Evolución prevista
 
@@ -47,13 +58,17 @@ o confirma reservas.
 Miniaplicación Python con consumo de API, instrucciones de sistema,
 catálogo, procesamiento de respuestas y manejo de errores.
 
-### Gate 2 — Componentes de IA e integración
+### Gate 2 — Componentes implementados, entrega en preparación
 
-Progresión prevista hacia recuperación de documentos con RAG,
-herramientas y flujos de atención y agendamiento.
+RAG persistente, recuperación evaluada, respuestas con fuentes,
+seguridad, decisión de personalización, observabilidad y mediciones.
 
-El alcance obligatorio se determinará con la rúbrica vigente y la
-ficha de alineación técnica.
+También se implementó supervisión del prompt mediante LangGraph.
+El agente con memoria existe por separado; integrarlo con el RAG
+es una mejora opcional pendiente.
+
+El cierre de la entrega incluye actualizar la documentación
+y comprobar que las evidencias correspondan a la versión entregada.
 
 ### Gate 3 — Integración del producto
 
@@ -69,7 +84,7 @@ requisitos del curso y las decisiones del proyecto.
 - Datos necesarios para gestionar una solicitud.
 - Reglas de confirmación, modificación y cancelación.
 - Acciones que requieren aprobación del profesional.
-- Documentos que formarán el corpus de consulta.
+- Ampliación del corpus de demostración a otros profesionales y servicios.
 - Almacenamiento, acceso y conservación de datos personales.
 - Entorno de despliegue y presupuesto de operación.
 

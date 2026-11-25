@@ -90,9 +90,12 @@ RAG ya está implementado para el corpus de demostración:
   fuentes esperadas y 1 consulta información ausente.
 - Corridas reales documentadas de latencia y consumo: 5.
 
-Para sostener la decisión falta evaluar 20 respuestas del RAG actual
-con criterios explícitos de formato y tono. Las respuestas históricas
-no sustituyen esa comprobación.
+Como validación adicional de esta decisión, se propone evaluar
+20 respuestas del RAG actual con criterios explícitos de formato
+y tono. Es una mejora de evaluación pendiente, no un requisito
+adicional que este documento imponga a la entrega del Gate 2.
+
+Las respuestas históricas no sustituyen esa comprobación.
 
 Si se reconsidera entrenamiento, existen 12 ejemplos de clasificación.
 Faltan 188 para alcanzar el umbral orientativo de 200 del curso.
@@ -112,6 +115,23 @@ Evidencias del repositorio:
 - [Dataset y validación](docs/evaluaciones/revision-dataset-tuning.md)
 - [Medición del RAG](docs/evaluaciones/revision-core28.md)
 
-Para cerrar el Gate 2 también se deben completar e integrar logging,
-seguridad, versionado, riesgos y supervisión humana. Elegir RAG
-no reemplaza esos requisitos.
+## 5. Estado de implementación al 25 de noviembre de 2026
+
+El proyecto ya cuenta con logging JSON, trace_id, registro de consumo,
+filtro de preguntas y documentos, matriz de riesgos, versionado
+de prompts y supervisión humana integrada con su activación.
+
+Las pruebas seleccionadas de seguridad, integración, supervisión,
+prompt activo y conservación del consumo completaron 35 casos
+aprobados mediante simulaciones.
+
+También se verificó el flujo RAG real desde un clon limpio,
+incluyendo persistencia, respuesta citada, tiempos y tokens.
+
+Estas evidencias respaldan la implementación de RAG. No constituyen
+una comparación empírica contra modelos entrenados con fine-tuning
+o PEFT.
+
+- [Arquitectura actual](docs/arquitectura.md)
+- [Matriz de riesgos](docs/matriz-riesgos.md)
+- [Ensayo limpio de Gate 2](docs/verificacion-instalacion-gate2.md)

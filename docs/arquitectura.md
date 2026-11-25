@@ -1,104 +1,140 @@
-# Arquitectura del asistente de agendamiento
+# Arquitectura del asistente para profesionales independientes
+
+Estado documentado: 25 de noviembre de 2026.
 
 ## Objetivo
 
-Orientar consultas sobre servicios, precios y condiciones de un
-profesional independiente mediante una aplicación de terminal
-conectada a Gemini.
+Orientar consultas sobre servicios y políticas de un profesional
+independiente, utilizando información verificable y fuentes citadas.
 
-## Diagrama
+La fotografía es el caso de demostración. No limita el producto
+a profesionales de esa especialidad.
 
-![Arquitectura del asistente](diagrama_arquitectura.png)
+## Arquitectura actual — Gate 2
 
-[Descargar versión editable para draw.io](diagrama_arquitectura.drawio)
+La entrada instrumentada es `registro_rag.py`. Recupera documentos,
+filtra el contexto, genera una respuesta y registra tiempos y consumo.
 
-## Componentes
+```mermaid
+flowchart TD
+    A["Pregunta del usuario"] --> B{"Validación de entrada"}
+    B -->|Rechazada| C["Error controlado"]
+    B -->|Aceptada| D["Embedding y búsqueda en Chroma"]
+    D --> E["Filtro de documentos y contexto numerado"]
+    E --> F{"¿Queda evidencia utilizable?"}
+    F -->|No| G["Abstención sin generación"]
+    F -->|Sí| H["Gemini con prompt activo"]
+    H --> I["Registro de consumo"]
+    I --> J["Validación de respuesta y citas"]
+    J -->|Válida| K["Respuesta con fuentes"]
+    J -->|Inválida| C
+```
 
-| Componente | Responsabilidad |
+Los eventos de la ruta instrumentada comparten un `trace_id`.
+Si falla la validación de la respuesta, se conserva el consumo
+reportado por el modelo y se registra el fallo.
+
+La ausencia de fragmentos utilizables permite abstenerse sin generar.
+Si existen fragmentos pero no responden la pregunta, las instrucciones
+piden al modelo declarar que no dispone de información suficiente.
+
+## Componentes principales
+
+| Archivo | Responsabilidad |
 |---|---|
-| Terminal | Recibir la consulta y mostrar el resultado o un error. |
-| `datos_profesional.json` | Contener servicios, precios, duración y condiciones. |
-| `crear_instrucciones_sistema` | Preparar las reglas y el catálogo para el prompt de sistema. |
-| `armar_peticion` | Separar `systemInstruction` del mensaje del usuario y solicitar salida JSON cuando se proporcionan instrucciones de sistema. |
-| `enviar_peticion` | Enviar la petición con tiempo de espera, controlar errores HTTP y leer el JSON del servicio. |
-| `extraer_texto` | Obtener el texto generado dentro de la respuesta del servicio. |
-| `parsear_respuesta_json` | Interpretar el texto generado como JSON y validar su estructura y restricciones. |
-| `calcular_costo` | Estimar el costo a partir del uso de tokens y las tarifas configuradas. |
-| `perf_counter` | Medir la duración de la petición. |
-| `.env` | Almacenar localmente la clave, excluida del repositorio. |
+| `indexar_corpus.py` | Crear, verificar y actualizar el índice persistente. |
+| `recuperar_corpus.py` | Buscar fragmentos y construir el contexto con su mapa de citas. |
+| `seguridad_rag.py` | Revisar preguntas y filtrar documentos mediante patrones sospechosos. |
+| `responder_corpus.py` | Generar respuestas documentales y validar sus citas. |
+| `registro_rag.py` | Instrumentar el RAG con tiempos, consumo y eventos correlacionados. |
+| `logging_rag.py` | Proporcionar logs JSON y contexto de trazabilidad. |
+| `registro_prompts.py` | Registrar versiones de prompts y sus huellas. |
+| `grafo_supervision.py` | Pausar el flujo para aprobar o rechazar una propuesta de prompt. |
+| `prompt_activo.py` | Aplicar la decisión y cargar la versión seleccionada. |
+| `agente_con_herramientas.py` | Ofrecer herramientas del catálogo y memoria de conversación. |
 
-## Flujo de ejecución
+## Documentos e índice
 
-1. Cargar el catálogo del profesional.
-2. Crear las instrucciones de sistema con las reglas y el catálogo.
-3. Recibir la consulta por terminal.
-4. Construir la petición con instrucciones y consulta separadas.
-5. Enviar la petición a Gemini y medir su duración.
-6. Comprobar la respuesta HTTP y leer el JSON del servicio.
-7. Extraer el texto generado y calcular el costo estimado.
-8. Interpretar ese texto como JSON y validar sus claves, tipos
-   y la restricción de no confirmar reservas.
-9. Mostrar el JSON validado o un error controlado.
+El corpus de demostración contiene cinco documentos en `docs/corpus/`:
+dos servicios y tres documentos sobre agendamiento, cancelaciones y pagos.
 
-La latencia y el costo se imprimen antes de la validación final
-del JSON generado. Por sí solos no demuestran que la salida
-cumpla los requisitos.
+El índice Chroma se guarda localmente en `vectorstore/`, excluido de Git.
+En una instalación nueva debe construirse siguiendo el README.
 
-## Dos niveles de JSON
+La verificación permite reabrir el índice sin recalcular los embeddings
+del corpus. La actualización conserva los fragmentos sin cambios y
+procesa los nuevos o modificados.
 
-- El JSON del servicio contiene la respuesta de Gemini y sus
-  metadatos de uso.
-- El JSON generado por el modelo contiene los datos de orientación
-  que valida la aplicación.
+## Seguridad y límites
 
-Leer correctamente el primero no garantiza que el segundo sea válido.
+- La pregunta se revisa antes de recuperar documentos.
+- Los documentos sospechosos se excluyen antes de construir el contexto.
+- Las reglas del sistema se mantienen separadas de la pregunta.
+- Las citas deben corresponder al contexto aceptado.
+- La existencia de una cita no demuestra por sí sola que respalde
+  semánticamente toda la afirmación.
+- Los patrones de detección son una defensa básica: no garantizan
+  bloquear todos los ataques.
+- La aplicación no consulta disponibilidad ni registra, envía,
+  modifica, cancela o confirma reservas.
 
-## Estructura de la respuesta generada
+Los logs operativos evitan copiar preguntas, documentos o mensajes
+completos de error. Los registros de evaluación pueden contener
+preguntas y respuestas del caso simulado y deben revisarse antes
+de publicarlos.
 
-| Clave | Tipo | Restricción |
-|---|---|---|
-| `respuesta` | Texto | No puede estar vacío. |
-| `requiere_contacto_profesional` | Booleano | Indica si se necesita gestión directa del profesional. |
-| `reserva_confirmada` | Booleano | Debe ser `false`. |
+## Versionado y supervisión
 
-La validación de estructura no garantiza la exactitud de todo
-el texto. Esa calidad también se revisa en las pruebas.
+LangGraph permite revisar una propuesta de prompt mediante una pausa
+y una decisión humana. La versión aprobada se utiliza en las consultas
+posteriores del RAG.
 
-## Alcance actual
+El punto de control del grafo utiliza memoria del proceso.
+La selección activa se conserva localmente mediante `prompt_activo.py`.
+No se ha implementado un sistema de usuarios, roles o aprobaciones remotas.
 
-- Responde consultas usando el catálogo de ejemplo.
-- No consulta disponibilidad real.
-- No confirma reservas.
-- No registra, guarda ni envía solicitudes al profesional.
-- Orienta al contacto directo para concretar una reserva.
-- Muestra costos estimados, no importes de facturación comprobados.
+## Agente con memoria
 
-## Evaluación y pruebas
+El agente utiliza herramientas para consultar el catálogo JSON
+y conserva el historial durante la sesión.
 
-### Comparación de modelos
+Actualmente funciona por separado del RAG documental.
+Integrarlo mediante una herramienta de consulta documental es una
+mejora opcional pendiente; no se presenta como funcionalidad terminada.
 
-`src/evaluar_modelos.py` compara candidatos y conserva resultados
-en `docs/evaluaciones/`.
+## Observabilidad y evaluación
 
-Los registros existentes corresponden a las instrucciones utilizadas
-en cada corrida. El script conserva el uso de `preparar_consulta`,
-que combina instrucciones y consulta en un texto.
+Se registran tiempos por etapa, tokens informados por el proveedor
+y costo estimado de generación.
 
-### Banco de prompts
+El costo del embedding se declara desconocido cuando no se dispone
+de información suficiente; no se considera gratuito automáticamente.
 
-`prompts/banco.py` define tres casos con instrucciones de sistema,
-entradas y criterios esperados.
+El banco de recuperación contiene diez consultas:
+nueve con fuentes esperadas y una sobre información ausente.
 
-`prompts/test_consistencia.py` utiliza las instrucciones separadas,
-ejecuta llamadas reales y registra éxitos y fallos en archivos
-`prompts/registro-*.json`.
+Las 35 pruebas seleccionadas de seguridad, integración, supervisión,
+prompt activo y consumo pasaron el 25 de noviembre de 2026.
+Estas pruebas utilizan simulaciones y no sustituyen el ensayo real.
 
-### Instalación limpia
+El ensayo desde un clon limpio verificó instalación, indexación,
+persistencia, actualización, aprobación del prompt y una consulta
+real con respuesta citada y trazabilidad.
 
-El procedimiento y sus resultados están en
-[Verificación de instalación](verificacion-instalacion.md).
+- [Ensayo limpio de Gate 2](verificacion-instalacion-gate2.md)
+- [Matriz de riesgos](matriz-riesgos.md)
+- [Decisión de personalización](../decision_personalizacion.md)
 
-## Decisión de modelo
+## Antecedente — Gate 1
 
-La elección del modelo y sus limitaciones están documentadas en
-[Decisión de arquitectura](decision-arquitectura.md).
+La primera versión utilizaba el catálogo JSON, llamadas HTTP a Gemini
+y validación de una respuesta JSON con tres campos.
+
+Ese contrato corresponde a la versión inicial. La salida documental
+del RAG contiene texto y fuentes; no se confunde con aquel contrato.
+
+![Arquitectura de Gate 1](diagrama_arquitectura.png)
+
+[Diagrama editable de Gate 1](diagrama_arquitectura.drawio)
+
+[Decisión inicial de modelo](decision-arquitectura.md)
