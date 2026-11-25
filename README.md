@@ -1,12 +1,224 @@
 # Asistente de atención y agendamiento
 
-Miniaplicación de terminal en Python que utiliza Gemini para orientar
-consultas sobre servicios, precios y condiciones de un profesional
-independiente.
+Proyecto en Python de un asistente para profesionales independientes.
 
-El catálogo actual contiene datos de ejemplo de servicios de fotografía.
+La versión RAG consulta documentos propios sobre servicios y políticas,
+recupera fragmentos relevantes y genera respuestas con fuentes citadas.
+Incluye medición de tiempos y consumo, logging estructurado, filtrado
+de documentos sospechosos y aprobación humana de versiones del prompt.
 
-## Funcionalidades
+La fotografía es el caso de demostración. Los servicios, precios
+y condiciones utilizados son datos de ejemplo.
+
+La aplicación no consulta disponibilidad real ni registra, envía,
+modifica, cancela o confirma reservas.
+
+## Ejecutar el RAG — Gate 2
+
+Todos los comandos se ejecutan desde la raíz del repositorio,
+con el entorno virtual activo.
+
+Primero completa la sección
+[Instalación en macOS o Linux](#instalación-en-macos-o-linux):
+clonar, crear el entorno, instalar requirements.txt y configurar
+GEMINI_API_KEY en el archivo local .env.
+
+Comprueba las dependencias:
+
+```bash
+python -m pip check
+```
+
+### 1. Crear el índice por primera vez
+
+El corpus está en docs/corpus/. Contiene cinco documentos Markdown
+con servicios y políticas del profesional de ejemplo.
+
+```bash
+python indexar_corpus.py indexar
+```
+
+Este comando calcula embeddings mediante Gemini y guarda el índice
+en vectorstore/. Requiere conexión, clave válida y cuota disponible.
+
+Se utiliza el modelo de embeddings models/gemini-embedding-001.
+La colección de Chroma se llama fotografia.
+
+Si vectorstore/ ya existe, el comando se detiene para evitar
+reconstruir el índice accidentalmente.
+
+### 2. Verificar la persistencia
+
+Ejecuta una segunda operación independiente:
+
+```bash
+python indexar_corpus.py verificar
+```
+
+Este modo reabre Chroma y compara los textos y fuentes guardados
+con el corpus actual. No recalcula embeddings ni llama a Gemini.
+
+Comprueba persistencia y correspondencia con los archivos;
+no mide la calidad de la recuperación.
+
+### 3. Aplicar cambios al corpus
+
+Después de modificar un documento:
+
+```bash
+python indexar_corpus.py actualizar
+python indexar_corpus.py verificar
+```
+
+La actualización conserva los fragmentos vigentes, genera embeddings
+para los nuevos o modificados y retira los obsoletos.
+
+Si no hay cambios, no genera embeddings nuevos.
+No es necesario borrar vectorstore/ para actualizar el contenido.
+
+### 4. Aprobar una versión del prompt
+
+Las dos versiones iniciales están publicadas en
+docs/prompts/versiones.json, con autor, fecha, nota y huella SHA-256.
+
+Para revisar la propuesta de versión 2:
+
+```bash
+python grafo_supervision.py
+```
+
+El grafo se pausa y muestra la propuesta:
+
+- Responder s aprueba y activa la versión propuesta.
+- Responder n conserva la selección anterior.
+
+La selección se guarda en .local/prompt_activo.json.
+Esta carpeta está excluida de Git.
+
+Para consultar la selección actual:
+
+```bash
+python -c "from prompt_activo import cargar_version_activa; v = cargar_version_activa(); print('Versión activa:', v['version'] if v else 'prompt base')"
+```
+
+En una instalación nueva, mientras no exista una selección aprobada,
+se utiliza el prompt base.
+
+El checkpoint del grafo vive en RAM y no sobrevive al cierre
+del programa. La selección aprobada sí queda guardada localmente.
+La aprobación no implementa autenticación ni gestión de roles.
+
+registro_prompts.py creó el registro inicial y se niega
+a sobrescribirlo. No es necesario ejecutarlo nuevamente para instalar.
+
+### 5. Ejecutar una consulta completa con instrumentación
+
+```bash
+python registro_rag.py "¿Cuánto cuesta la sesión familiar y cuánto dura?" --k 2
+```
+
+Esta ejecución:
+
+1. Convierte la pregunta en un embedding y recupera fragmentos.
+2. Filtra documentos con patrones sospechosos.
+3. Construye el contexto y las citas solo con los documentos aceptados.
+4. Genera la respuesta usando el prompt seleccionado.
+5. Valida que las citas correspondan al contexto.
+6. Registra tiempos, tokens y costo estimado de generación.
+
+El comando realiza llamadas reales a Gemini.
+Si no queda contexto utilizable, se abstiene sin llamar
+al modelo generativo; la búsqueda ya pudo consumir un embedding.
+
+La respuesta del RAG es texto con citas, no el contrato JSON
+de la versión inicial con catálogo.
+
+La consola muestra un objeto JSON con la respuesta, fuentes,
+trace_id, tiempos, consumo y conteos de documentos.
+
+### 6. Revisar registros y evidencias
+
+Los eventos operativos se guardan en:
+
+```text
+logs/rag.jsonl
+```
+
+Los eventos de una misma consulta comparten trace_id.
+Se registran longitudes, huellas, conteos, tiempos y consumo,
+sin copiar el texto de preguntas o documentos a esos eventos.
+
+Para revisar los últimos eventos en macOS o Linux:
+
+```bash
+tail -n 12 logs/rag.jsonl
+```
+
+La carpeta logs/ está excluida de Git.
+
+El comando también agrega una evidencia de evaluación en:
+
+```text
+docs/evaluaciones/registros_latencia_costo.jsonl
+```
+
+Ese archivo sí conserva la pregunta y la respuesta.
+Para las evidencias publicadas se utilizan exclusivamente consultas
+y datos de ejemplo.
+
+El costo de generación es una estimación con las tarifas configuradas,
+no necesariamente el importe facturado. El costo del embedding
+se informa como desconocido; no está incluido en esa estimación.
+
+### 7. Evaluar la recuperación
+
+```bash
+python evaluacion_recuperacion.py --k 2
+```
+
+Evalúa diez preguntas del corpus mediante búsqueda real.
+Calcula precisión, exhaustividad y F1, y guarda un reporte nuevo
+en docs/evaluaciones/.
+
+Este comando genera embeddings de las preguntas, pero no llama
+al modelo de chat para redactar respuestas.
+
+El caso sin fuente esperada no tiene exhaustividad ni F1 definidos.
+La evaluación actual requiere un fragmento por archivo;
+si el corpus crece, deben revisarse las etiquetas del banco.
+
+### 8. Ejecutar pruebas de seguridad y supervisión
+
+```bash
+python -m pytest test_seguridad_rag.py test_integracion_seguridad_rag.py test_grafo_supervision.py test_prompt_activo.py -v
+```
+
+Resultado observado durante el desarrollo: 18 pruebas aprobadas.
+
+Estas pruebas utilizan documentos y modelos simulados, sin llamadas
+a Gemini. Comprueban filtrado, citas, abstención, pausa,
+aprobación, rechazo y selección del prompt utilizado por el RAG.
+
+### Documentación y límites
+
+- [Decisión de personalización](decision_personalizacion.md)
+- [Matriz de riesgos](docs/matriz-riesgos.md)
+- [Evidencia del Core 28](docs/evaluaciones/revision-core28.md)
+- [Verificación del logging](docs/evaluaciones/revision-logging-rag.md)
+- [Evidencia del Core 32](docs/evaluaciones/revision-core32.md)
+
+El filtro por patrones es una defensa parcial.
+La validación de citas comprueba que las referencias existan;
+no garantiza que respalden todas las afirmaciones.
+
+Los reintentos del cliente HTTP de la versión inicial no se aplican
+automáticamente al RAG: sus modelos de chat están configurados
+con max_retries=0.
+
+El ensayo final de instalación limpia del Gate 2 está pendiente
+de ejecutar y documentar.
+
+## Funcionalidades del asistente con catálogo JSON
 
 - Consultar servicios, precios y duración.
 - Orientar solicitudes incompletas.
@@ -28,8 +240,9 @@ La reserva requiere contacto directo y confirmación del profesional.
 
 ## Requisitos
 
-- Python 3.14.8, versión utilizada en el ensayo de instalación.
-  Otras versiones no han sido verificadas.
+- Python 3.14.8, utilizado durante el desarrollo y en el ensayo
+  de instalación del Gate 1. El ensayo limpio del Gate 2
+  está pendiente de completar.
 - Git.
 - Conexión a internet.
 - Una clave de Gemini con acceso y cuota para el modelo utilizado.
@@ -71,7 +284,7 @@ GEMINI_API_KEY=tu_clave_real
 La clave se guarda únicamente en el archivo local `.env`.
 No debe agregarse al repositorio.
 
-## Ejecutar el asistente
+## Ejecutar el asistente con catálogo JSON
 
 Modelo predeterminado: `gemini-3.5-flash-lite`.
 
@@ -274,9 +487,15 @@ y maneja errores.
 
 Se utiliza un profesional de fotografía como caso de ejemplo.
 
-La consulta de documentos con RAG y las herramientas de disponibilidad
-y reserva corresponden a la progresión prevista para Gate 2.
-FastAPI, persistencia, interfaz y Docker se contemplan para Gate 3.
+Gate 2 incorpora consulta documental con RAG, fuentes citadas,
+evaluación de recuperación, medición, trazabilidad y controles
+de seguridad.
+
+La consulta de disponibilidad y la gestión de reservas siguen fuera
+del alcance implementado. Su incorporación se definirá en el diseño
+funcional del producto final.
+
+FastAPI y Docker corresponden a la siguiente etapa del curso.
 
 ## Cliente modular — Bloques 12 y 13
 
