@@ -175,6 +175,25 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         metadata_uso = getattr(mensaje, "usage_metadata", None)
         uso = dict(metadata_uso) if metadata_uso else None
 
+        # Registramos el consumo al recibir el mensaje, antes de validar
+        # su contenido. Una respuesta rechazada también consumió tokens.
+        costo_generacion = calcular_costo_consulta(
+            uso,
+            TARIFAS_MODELOS.get(nombre_modelo),
+        )
+
+        # Si el proveedor no informa tokens, conservamos None.
+        # No confundimos un consumo desconocido con un consumo de cero.
+        contadores = uso or {}
+        registrar_evento(
+            "consumo_llm",
+            modelo=nombre_modelo,
+            input_tokens=contadores.get("input_tokens"),
+            output_tokens=contadores.get("output_tokens"),
+            total_tokens=contadores.get("total_tokens"),
+            costo_generacion_estimado_usd=costo_generacion,
+        )
+
         # Extraemos texto sin asumir que content siempre es una cadena.
         respuesta = StrOutputParser().invoke(mensaje).strip()
         if not respuesta:
@@ -183,11 +202,6 @@ def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         # Conservamos la validación existente:
         # las citas deben corresponder a los fragmentos recuperados.
         fuentes = validar_citas(respuesta, mapa_citas)
-
-        costo_generacion = calcular_costo_consulta(
-            uso,
-            TARIFAS_MODELOS.get(nombre_modelo),
-        )
 
     # Medimos el tiempo total por separado: también incluye extracción
     # del texto y validación. Puede superar la suma de las tres etapas.
@@ -263,22 +277,9 @@ def registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
         # con los eventos operativos de esta consulta.
         registro["trace_id"] = identificador
 
-        if registro["generacion_ejecutada"]:
-            uso = registro["tokens"] or {}
-
-            registrar_evento(
-                "consumo_llm",
-                modelo=nombre_modelo,
-                input_tokens=uso.get("input_tokens"),
-                output_tokens=uso.get("output_tokens"),
-                total_tokens=uso.get("total_tokens"),
-                costo_generacion_estimado_usd=registro[
-                    "costo_generacion_estimado_usd"
-                ],
-            )
-        else:
-            # La abstención sin generación no debe aparentar una llamada
-            # al modelo ni un consumo de tokens observado.
+        # El consumo ya se registró al recibir la respuesta del modelo.
+        # Aquí solo informamos cuando se omitió la generación.
+        if not registro["generacion_ejecutada"]:
             registrar_evento(
                 "generacion_omitida",
                 motivo="sin_fragmentos_utilizables",
