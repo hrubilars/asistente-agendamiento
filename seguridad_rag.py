@@ -66,3 +66,21 @@ def filtrar_documentos_sospechosos(documentos):
     # Conservamos los objetos originales, incluidos sus IDs y metadatos.
     # Esta función no imprime ni registra el contenido de los documentos.
     return limpios, descartados
+
+def validar_pregunta_segura(pregunta):
+    """Valida la entrada y rechaza señales conocidas de prompt injection."""
+    if not isinstance(pregunta, str) or not pregunta.strip():
+        raise ValueError("La pregunta debe ser un texto no vacío.")
+
+    # Quitamos espacios exteriores sin modificar el contenido de la consulta.
+    pregunta = pregunta.strip()
+
+    # Reutilizamos el detector que ya protege los documentos.
+    # Si encuentra señales, detenemos el flujo antes del embedding.
+    if detectar_inyeccion(pregunta):
+        # El error no incluye la pregunta ni sus instrucciones sospechosas.
+        raise ValueError(
+            "La pregunta contiene instrucciones sospechosas."
+        )
+
+    return pregunta

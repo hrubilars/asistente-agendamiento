@@ -11,7 +11,10 @@ from cadena_asistente import MODELO
 from indexar_corpus import INDICE, RAIZ
 from recuperar_corpus import abrir_indice, formatear_contexto, recuperar_fragmentos
 
-from seguridad_rag import filtrar_documentos_sospechosos
+from seguridad_rag import (
+    filtrar_documentos_sospechosos,
+    validar_pregunta_segura,
+)
 
 from langchain_core.messages import SystemMessage
 from prompt_activo import cargar_version_activa
@@ -88,6 +91,14 @@ def validar_citas(respuesta, mapa_citas):
 
 
 def responder(almacen, modelo, pregunta, k=2):
+    """Recupera evidencia, genera una respuesta y revisa sus referencias."""
+    # NUEVO: rechaza preguntas sospechosas antes de consultar el índice.
+    pregunta = validar_pregunta_segura(pregunta)
+
+    # Primera llamada a Gemini: convertir la pregunta en un embedding.
+    # Chroma usa ese vector para buscar hasta k fragmentos.
+    fragmentos = recuperar_fragmentos(almacen, pregunta, k=k)
+
     """Recupera evidencia, genera una respuesta y revisa sus referencias."""
     # Primera llamada a Gemini: convertir la pregunta en un embedding.
     # Chroma usa ese vector para buscar hasta k fragmentos en el índice existente.

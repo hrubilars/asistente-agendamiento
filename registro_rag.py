@@ -31,7 +31,10 @@ from logging_rag import (
     registrar_evento,
 )
 
-from seguridad_rag import filtrar_documentos_sospechosos
+from seguridad_rag import (
+    filtrar_documentos_sospechosos,
+    validar_pregunta_segura,
+)
 
 
 @contextmanager
@@ -78,9 +81,10 @@ def calcular_costo_consulta(uso, tarifas):
 
 def _registrar_consulta(almacen, modelo, pregunta, k=2, nombre_modelo=MODELO):
     """Ejecuta el RAG y devuelve su respuesta junto con tiempos y consumo."""
-    pregunta = pregunta.strip()
-    if not pregunta:
-        raise ValueError("La pregunta no puede estar vacía.")
+    # Revisamos la pregunta antes de recuperar documentos o generar.
+    # registrar_consulta() capturará el error y registrará únicamente
+    # su tipo, conservando el trace_id sin copiar la pregunta al log.
+    pregunta = validar_pregunta_segura(pregunta)
     if type(k) is not int or k < 1:
         raise ValueError("k debe ser un entero mayor o igual a 1.")
 
