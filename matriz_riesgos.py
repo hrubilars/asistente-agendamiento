@@ -181,6 +181,15 @@ RIESGOS = [
     },
 ]
 
+# Indica en qué bloques construimos los controles de cada riesgo.
+BLOQUES_POR_RIESGO = {
+    "R1": "31",
+    "R2": "32",
+    "R3": "26 y 27",
+    "R4": "31",
+    "R5": "24 y 25",
+    "R6": "12, 13, 28 y 31",
+}
 
 def clasificar(puntaje):
     """Aplica los rangos de severidad utilizados en el curso."""
@@ -286,7 +295,10 @@ def generar_documento(riesgos):
             riesgo["justificacion"],
             "",
             "**Mitigación:**",
-            riesgo["mitigacion"],
+            (
+                f"Bloques del curso: {BLOQUES_POR_RIESGO[riesgo['id']]}. "
+                f"{riesgo['mitigacion']}"
+            ),
             "",
             "**Supervisión y responsable:**",
             riesgo["supervision"],

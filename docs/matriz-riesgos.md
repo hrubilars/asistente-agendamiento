@@ -35,7 +35,7 @@ Un documento recuperado contiene instrucciones que intentan cambiar el comportam
 El corpus se administra localmente, pero un documento incorporado podría contener instrucciones maliciosas. El filtro tiene límites.
 
 **Mitigación:**
-Filtrar antes de construir el contexto; conservar solo fuentes aceptadas; abstenerse si no queda contexto utilizable. Mantener instrucciones de sistema separadas de los documentos.
+Bloques del curso: 31. Filtrar antes de construir el contexto; conservar solo fuentes aceptadas; abstenerse si no queda contexto utilizable. Mantener instrucciones de sistema separadas de los documentos.
 
 **Supervisión y responsable:**
 El responsable del corpus revisa documentos nuevos y los descartes antes de corregir o volver a incorporar contenido. Esta revisión es manual, no una pausa automática del grafo.
@@ -51,7 +51,7 @@ Activar una modificación del prompt que elimine límites o permita afirmar acci
 Los prompts cambian durante el desarrollo y afectan todas las respuestas. Una modificación incorrecta puede alterar los límites de autonomía.
 
 **Mitigación:**
-Registrar versiones y diferencias; comprobar huellas; activar la propuesta únicamente después de aprobarla.
+Bloques del curso: 32. Registrar versiones y diferencias; comprobar huellas; activar la propuesta únicamente después de aprobarla.
 
 **Supervisión y responsable:**
 El mantenedor revisa el texto y sus diferencias antes de aprobar. grafo_supervision.py se pausa en solicitar_aprobacion mediante interrupt(); Command reanuda con aprobación o rechazo. aplicar_decision conserva la selección anterior si se rechaza.
@@ -67,7 +67,7 @@ Responder con un precio, duración o condición incorrectos aunque la respuesta 
 El catálogo es pequeño, pero una cita existente no demuestra que el documento respalde cada afirmación generada.
 
 **Mitigación:**
-Usar el contexto recuperado, exigir citas existentes y permitir abstención. Complementar con evaluación manual del contenido.
+Bloques del curso: 26 y 27. Usar el contexto recuperado, exigir citas existentes y permitir abstención. Complementar con evaluación manual del contenido.
 
 **Supervisión y responsable:**
 El responsable revisa respuestas de prueba al cambiar documentos, modelo o prompt. Si detecta información falsa, suspende la entrega de esa versión hasta corregirla y repetir la evaluación.
@@ -83,7 +83,7 @@ Exponer preguntas, documentos sensibles o credenciales en registros operativos o
 Actualmente usamos datos de ejemplo, pero cambios de código podrían incorporar contenido crudo a los registros.
 
 **Mitigación:**
-Registrar longitudes, huellas, conteos y consumo; registrar errores por tipo; excluir .env, credenciales.json, logs/ y .local/ de Git.
+Bloques del curso: 31. Registrar longitudes, huellas, conteos y consumo; registrar errores por tipo; excluir .env, credenciales.json, logs/ y .local/ de Git.
 
 **Supervisión y responsable:**
 El mantenedor revisa los campos registrados y los archivos preparados para cada entrega. Los registros de evaluación publicados deben contener exclusivamente datos de ejemplo.
@@ -99,7 +99,7 @@ Responder con una política antigua porque el corpus cambió pero el índice per
 Modificar un Markdown no actualiza automáticamente los fragmentos que ya están guardados en Chroma.
 
 **Mitigación:**
-Ejecutar la actualización incremental y verificar que el índice coincida con el corpus antes de utilizar cambios de contenido.
+Bloques del curso: 24 y 25. Ejecutar la actualización incremental y verificar que el índice coincida con el corpus antes de utilizar cambios de contenido.
 
 **Supervisión y responsable:**
 El responsable del corpus comprueba los fragmentos modificados y una consulta sobre la política actualizada antes de dar el cambio por terminado.
@@ -115,7 +115,7 @@ Interrumpir una consulta por falta de cuota, alta demanda o indisponibilidad del
 Ya se observaron errores HTTP 429 y 503. En el alcance actual interrumpen la orientación, pero no modifican reservas.
 
 **Mitigación:**
-Mantener tiempos de espera y registrar el tipo de fallo. No presentar una consulta fallida como una respuesta exitosa. El cliente HTTP tiene reintentos acotados, pero no debemos suponer que se aplican también al flujo LangChain del RAG.
+Bloques del curso: 12, 13, 28 y 31. Mantener tiempos de espera y registrar el tipo de fallo. No presentar una consulta fallida como una respuesta exitosa. El cliente HTTP tiene reintentos acotados, pero no debemos suponer que se aplican también al flujo LangChain del RAG.
 
 **Supervisión y responsable:**
 El operador revisa cuota y disponibilidad antes de repetir consultas. No ejecuta reintentos masivos para intentar resolver una cuota agotada.
