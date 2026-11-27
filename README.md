@@ -190,14 +190,75 @@ si el corpus crece, deben revisarse las etiquetas del banco.
 ### 8. Ejecutar pruebas de seguridad y supervisión
 
 ```bash
-python -m pytest test_seguridad_rag.py test_integracion_seguridad_rag.py test_grafo_supervision.py test_prompt_activo.py -v
+python -m pytest test_consumo_rag.py test_seguridad_preguntas.py test_seguridad_rag.py test_integracion_seguridad_rag.py test_grafo_supervision.py test_prompt_activo.py -v
 ```
 
-Resultado observado durante el desarrollo: 18 pruebas aprobadas.
+Resultado observado durante el desarrollo: 35 pruebas aprobadas.
 
 Estas pruebas utilizan documentos y modelos simulados, sin llamadas
-a Gemini. Comprueban filtrado, citas, abstención, pausa,
-aprobación, rechazo y selección del prompt utilizado por el RAG.
+a Gemini. Comprueban:
+
+- Validación de preguntas antes de recuperar o generar.
+- Filtrado de documentos sospechosos.
+- Reconstrucción y validación de citas.
+- Abstención cuando no queda contexto utilizable.
+- Registro del consumo antes de validar la respuesta generada.
+- Pausa, aprobación y rechazo de versiones del prompt.
+- Selección del prompt utilizado por el RAG.
+
+### 9. Ejecutar el agente documental con memoria
+
+Requiere el índice creado y la configuración local indicada anteriormente.
+
+```bash
+python agente_documental.py
+```
+
+El agente utiliza la herramienta consultar_documentos para consultar
+el RAG. Mantiene el historial de la conversación y puede interpretar
+preguntas de seguimiento.
+
+Ejemplo, sin cerrar el programa entre preguntas:
+
+1. ¿Cuánto cuesta la sesión familiar?
+2. ¿Y cuánto dura esa sesión?
+3. ¿Cuál es la dirección exacta del estudio?
+
+Las dos primeras respuestas deben incluir citas y sus fuentes.
+La tercera debe indicar que los documentos no contienen información
+suficiente.
+
+Para terminar, escribe /salir.
+
+La herramienta devuelve directamente la respuesta del RAG, sus fuentes
+y el trace_id, sin una reescritura posterior del agente.
+
+Los eventos del RAG se guardan en logs/rag.jsonl. Esta entrada no
+agrega automáticamente registros a
+docs/evaluaciones/registros_latencia_costo.jsonl.
+
+#### Memoria y límites
+
+- Cada session_id mantiene un historial independiente.
+- La memoria permanece únicamente durante la ejecución del programa.
+- El aislamiento entre sesiones se verificó con pruebas automatizadas.
+- Los tiempos y costos registrados corresponden al RAG; no incluyen
+  las llamadas adicionales del planificador del agente.
+- La estimación de generación tampoco incluye el costo de embeddings.
+- La aplicación no consulta disponibilidad ni gestiona reservas.
+
+#### Verificación
+
+```bash
+python -m pytest test_agente_documental.py test_herramienta_documental.py -v
+```
+
+Resultado observado: nueve pruebas aprobadas, sin llamadas a Gemini.
+
+También se verificó una conversación real con consulta de precio,
+seguimiento sobre duración y abstención ante una dirección desconocida.
+
+Consultar la [evidencia del agente documental](docs/evaluaciones/agente-documental.md).
 
 ### Documentación y límites
 
