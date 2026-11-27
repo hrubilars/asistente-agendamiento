@@ -79,7 +79,12 @@ Se reutilizarán el filtro de preguntas y documentos, la validación de citas, e
 
 Diagrama objetivo: `docs/diagrama_arquitectura_gate3.png`.
 
-Estado: pendiente de crear. Debe mostrar FastAPI, LangChain, LangGraph, Gemini, Chroma y SQLite; la frontera Docker, los volúmenes persistentes y la configuración externa. Los nombres deben coincidir con esta sección. El diagrama de Gate 1 no representa el diseño final.
+![Arquitectura objetivo del producto final](diagrama_arquitectura_gate3.png)
+
+Fuente editable: [draw.io](diagrama_arquitectura_gate3.drawio).
+
+Diagrama creado. Representa la arquitectura objetivo y distingue
+los componentes existentes de los pendientes de construcción.
 
 ### Qué existe y qué falta construir
 
@@ -89,7 +94,7 @@ Estado: pendiente de crear. Debe mostrar FastAPI, LangChain, LangGraph, Gemini, 
 | Implementados y verificados | Agente con herramientas del catálogo y agente documental que integra memoria por sesión con RAG, fuentes citadas, abstención y trazabilidad de las consultas documentales. |
 | Pendientes de generalización | Retirar referencias exclusivas a fotografía de prompts y herramientas, parametrizar el perfil profesional y comprobar un segundo escenario de otra especialidad. |
 | Pendientes de construcción | Agenda simulada, registro persistente de solicitudes, decisión del profesional, protección del acceso de demostración, FastAPI y Docker. |
-| Pendientes de validación final | Pruebas del flujo completo, verificación de los RNF, instalación reproducible y diagrama del diseño final. |
+| Pendientes de validación final | Pruebas del flujo completo, verificación de los RNF, instalación reproducible y comprobación de que la implementación final coincida con el diagrama. |
 
 ## 4. Criterios de aceptación
 
@@ -120,8 +125,6 @@ Los contactos serán ficticios.
 RF-06 y RF-07 son deseables y no forman parte de estos criterios
 obligatorios. Su incorporación requiere revisar previamente el
 presupuesto de horas.
-
-## 5. Plan de construcción por hitos
 
 ## 5. Plan de construcción por hitos
 
