@@ -16,7 +16,7 @@ Se espera que el cliente obtenga información verificable en menos de un minuto,
 - RF-02: El cliente consulta los horarios disponibles para un servicio en una fecha indicada.
 - RF-03: El cliente registra una solicitud de hora con servicio, horario y contacto, identificada como pendiente de aprobación y con un número de seguimiento.
 - RF-04: El profesional aprueba o rechaza una solicitud pendiente; la aprobación produce una reserva confirmada y el rechazo deja constancia de que no fue confirmada.
-- RF-05: El cliente realiza preguntas de seguimiento conservando el servicio y las preferencias mencionadas durante su conversación.
+- RF-05: El cliente realiza preguntas de seguimiento conservando el servicio mencionado durante su conversación, sin mezclar el historial entre sesiones.
 - RF-06: El cliente solicita cambiar el horario de una reserva, sujeto a aprobación del profesional.
 - RF-07: El cliente solicita cancelar una reserva de acuerdo con las políticas del profesional.
 - RF-08: El servicio sincroniza las reservas con calendarios externos reales.
@@ -102,7 +102,7 @@ servicio "Clase individual", duración de 60 minutos y un horario de
 prueba el 10 de diciembre de 2026 a las 10:00, inicialmente disponible.
 Los contactos serán ficticios.
 
-- CA-01 (RF-01): Ante una consulta sobre el precio de un servicio incluido en el perfil activo, la respuesta contiene el precio configurado, una cita y la identificación del documento que respalda ese precio.
+- CA-01 (RF-01): Con el perfil de fotografía de prueba activo, ante "¿Cuánto cuesta el retrato profesional?", la respuesta indica $35.000 CLP y cita docs/corpus/retrato-profesional.md como fuente.
 - CA-02 (RF-01): Ante una consulta por una dirección ausente del corpus, la respuesta declara información insuficiente y devuelve la lista de fuentes citadas vacía.
 - CA-03 (RF-02): Al consultar los horarios de "Clase individual" para el 10 de diciembre de 2026, el resultado incluye las 10:00 si ese horario está disponible; después de confirmar una reserva para ese horario, la misma consulta deja de ofrecerlo.
 - CA-04 (RF-03): Al solicitar "Clase individual" para el horario disponible con un contacto ficticio válido, el sistema devuelve un identificador y estado pendiente; la solicitud sigue disponible mediante ese identificador después de reiniciar el servicio.
@@ -123,4 +123,42 @@ presupuesto de horas.
 
 ## 5. Plan de construcción por hitos
 
-[PENDIENTE: se completa en el Bloque 34]
+## 5. Plan de construcción por hitos
+
+Fecha de entrega: viernes 18 de diciembre de 2026.
+
+Disponibilidad declarada: 5 horas semanales.
+Presupuesto conservador: 15 horas durante tres semanas de trabajo.
+
+Se reservan 3 horas para imprevistos. Los hitos planificados suman
+12 horas: 7,5 de construcción e integración y 4,5 de pruebas,
+documentación y preparación de defensa.
+
+Las duraciones son estimaciones iniciales, pendientes de contrastar
+con el tiempo real. No representan trabajo ya completado.
+
+### Hitos
+
+- H1 1h: Perfil profesional configurable y conversación documental adaptada. Entrega: configuración y corpus de un segundo profesional ficticio, con respuestas correspondientes al perfil activo y seguimiento del servicio dentro de la sesión. Reutiliza el RAG y la memoria existentes. Cubre RF-01, RF-05 y CA-01, CA-02, CA-08.
+- H2 2.5h: Agenda y solicitudes persistentes sobre datos simulados. Entrega: horarios consultables, creación de solicitudes pendientes con identificador, validación de campos y recuperación de solicitudes después de reiniciar. Depende de H1. Cubre RF-02, RF-03 y CA-03, CA-04, CA-05.
+- H3 2h: Decisión autorizada del profesional. Entrega: aprobación y rechazo persistentes, comprobación atómica de disponibilidad y protección frente a aprobaciones repetidas o concurrentes. Depende de H2. Cubre RF-04, RNF-05 y CA-06, CA-07, CA-13.
+- H4 2h: Servicio FastAPI y ejecución con Docker. Entrega: endpoints validados de consulta, disponibilidad, solicitud, decisión y salud; configuración externa, persistencia mediante volúmenes y trazabilidad del flujo, incluidas las generaciones del planificador. Depende de H1, H2 y H3. Cubre RF-01 a RF-05, RNF-03, RNF-04, RNF-06 y prepara CA-11, CA-12, CA-14.
+- H5 4.5h: Validación integral y preparación de entrega. Entrega: ejecución registrada de CA-01 a CA-14, revisión manual del banco documental, medición de latencia, revisión de registros, ensayo de instalación con otra persona, diagrama final, README y guion de defensa con ensayo en vivo. Depende de H1 a H4. Cubre RF-01 a RF-05, RNF-01 a RNF-06 y CA-01 a CA-14.
+
+### Dependencias y control del presupuesto
+
+Los hitos se ejecutan en orden. Cada uno debe producir una entrega
+comprobable antes de comenzar el siguiente.
+
+Al terminar cada hito se registran las horas consumidas, el resultado
+y el trabajo restante. Si la proyección supera las 12 horas
+planificadas, se revisan las estimaciones y el alcance antes de seguir.
+
+Las 3 horas de margen no se asignan anticipadamente a nuevas funciones.
+
+RF-06 y RF-07 permanecen deseables y sin horas asignadas.
+RF-08, RF-09 y RF-10 permanecen fuera del MVP.
+
+La entrega del Gate 2 y las actividades administrativas pendientes
+se gestionan por separado; si consumen parte de estas 15 horas,
+se recalculará el presupuesto disponible para Gate 3.
