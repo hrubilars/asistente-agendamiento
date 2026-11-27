@@ -140,13 +140,16 @@ documentación y preparación de defensa.
 Las duraciones son estimaciones iniciales, pendientes de contrastar
 con el tiempo real. No representan trabajo ya completado.
 
+Horas disponibles: 15 h
+Margen de imprevistos: 3 h
+
 ### Hitos
 
-- H1 1h: Perfil profesional configurable y conversación documental adaptada. Entrega: configuración y corpus de un segundo profesional ficticio, con respuestas correspondientes al perfil activo y seguimiento del servicio dentro de la sesión. Reutiliza el RAG y la memoria existentes. Cubre RF-01, RF-05 y CA-01, CA-02, CA-08.
-- H2 2.5h: Agenda y solicitudes persistentes sobre datos simulados. Entrega: horarios consultables, creación de solicitudes pendientes con identificador, validación de campos y recuperación de solicitudes después de reiniciar. Depende de H1. Cubre RF-02, RF-03 y CA-03, CA-04, CA-05.
-- H3 2h: Decisión autorizada del profesional. Entrega: aprobación y rechazo persistentes, comprobación atómica de disponibilidad y protección frente a aprobaciones repetidas o concurrentes. Depende de H2. Cubre RF-04, RNF-05 y CA-06, CA-07, CA-13.
-- H4 2h: Servicio FastAPI y ejecución con Docker. Entrega: endpoints validados de consulta, disponibilidad, solicitud, decisión y salud; configuración externa, persistencia mediante volúmenes y trazabilidad del flujo, incluidas las generaciones del planificador. Depende de H1, H2 y H3. Cubre RF-01 a RF-05, RNF-03, RNF-04, RNF-06 y prepara CA-11, CA-12, CA-14.
-- H5 4.5h: Validación integral y preparación de entrega. Entrega: ejecución registrada de CA-01 a CA-14, revisión manual del banco documental, medición de latencia, revisión de registros, ensayo de instalación con otra persona, diagrama final, README y guion de defensa con ensayo en vivo. Depende de H1 a H4. Cubre RF-01 a RF-05, RNF-01 a RNF-06 y CA-01 a CA-14.
+- H1 (1 h): Perfil profesional configurable y conversación documental adaptada. Entrega: configuración y corpus de un segundo profesional ficticio, con respuestas correspondientes al perfil activo y seguimiento del servicio dentro de la sesión. Reutiliza el RAG y la memoria existentes. Cubre: RF-01, RF-05. Se comprueba con: CA-01, CA-02, CA-08.
+- H2 (2.5 h): Agenda y solicitudes persistentes sobre datos simulados. Entrega: horarios consultables, creación de solicitudes pendientes con identificador, validación de campos y recuperación de solicitudes después de reiniciar. Depende de H1. Cubre: RF-02, RF-03. Se comprueba con: CA-03, CA-04, CA-05.
+- H3 (2 h): Decisión autorizada del profesional. Entrega: aprobación y rechazo persistentes, comprobación atómica de disponibilidad y protección frente a aprobaciones repetidas o concurrentes. Depende de H2. Cubre: RF-04, RNF-05. Se comprueba con: CA-06, CA-07, CA-13.
+- H4 (2 h): Servicio FastAPI y ejecución con Docker. Entrega: endpoints validados de consulta, disponibilidad, solicitud, decisión y salud; configuración externa, persistencia mediante volúmenes y trazabilidad del flujo, incluidas las generaciones del planificador. Depende de H1, H2 y H3. Cubre: RF-01, RF-02, RF-03, RF-04, RF-05, RNF-03, RNF-04, RNF-06. Se comprueba con: CA-01, CA-02, CA-03, CA-04, CA-05, CA-06, CA-07, CA-08, CA-11, CA-12, CA-14.
+- H5 (4.5 h): Validación integral y preparación de entrega. Entrega: revisión manual del banco documental, medición de latencia, revisión de registros, ensayo de instalación con otra persona, actualización del diagrama y README, y guion de defensa con ensayo en vivo. Depende de H1, H2, H3 y H4. Cubre: RF-01, RF-02, RF-03, RF-04, RF-05, RNF-01, RNF-02, RNF-03, RNF-04, RNF-05, RNF-06. Se comprueba con: CA-01, CA-02, CA-03, CA-04, CA-05, CA-06, CA-07, CA-08, CA-09, CA-10, CA-11, CA-12, CA-13, CA-14.
 
 ### Dependencias y control del presupuesto
 
